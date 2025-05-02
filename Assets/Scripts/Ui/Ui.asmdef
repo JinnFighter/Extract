@@ -1,9 +1,8 @@
 {
-    "name": "Init",
+    "name": "Ui",
     "rootNamespace": "",
     "references": [
-        "GUID:0d1d926614004b64986ea9563a5ade2c",
-        "GUID:b820ee92d204bc749867f310eb97e0e0"
+        "GUID:0d1d926614004b64986ea9563a5ade2c"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
