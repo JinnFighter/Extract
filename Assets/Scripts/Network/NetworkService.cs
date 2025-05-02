@@ -27,9 +27,22 @@ namespace Network
             {
                 return false;
             }
-            
+
             await UniTask.WaitUntil(() => _networkManager.ServerManager.Started);
             return true;
+        }
+
+        public void StopHost()
+        {
+            if (!_networkManager.ServerManager.Started) return;
+
+            try
+            {
+                _networkManager.ServerManager.StopConnection(true);
+            }
+            catch (Exception e)
+            {
+            }
         }
 
         public async UniTask<bool> Connect(string address = "localhost")
@@ -39,6 +52,7 @@ namespace Network
 
             var finishedConnectionAttempt = false;
             var isSuccess = false;
+
             void HandleConnectionChanged(ClientConnectionStateArgs obj)
             {
                 switch (obj.ConnectionState)
@@ -51,24 +65,27 @@ namespace Network
                         isSuccess = false;
                         finishedConnectionAttempt = true;
                         break;
-                    default:
-                        break;
                 }
             }
 
             _networkManager.ClientManager.StartConnection(address);
-            
+
             await UniTask.WaitUntil(() => finishedConnectionAttempt);
             _networkManager.ClientManager.OnClientConnectionState -= HandleConnectionChanged;
             if (isSuccess)
-            {
                 await UniTask.WaitUntil(() =>
                     _networkManager.ClientManager.Started && _networkManager.ClientManager.Connection.IsValid);
-            }
             return isSuccess;
         }
 
-        public bool IsHosting() => _networkManager.ServerManager.Started;
-        public bool IsClientConnected() => _networkManager.ClientManager.Started;
+        public bool IsHosting()
+        {
+            return _networkManager.ServerManager.Started;
+        }
+
+        public bool IsClientConnected()
+        {
+            return _networkManager.ClientManager.Started;
+        }
     }
 }
