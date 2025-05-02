@@ -5,6 +5,7 @@ namespace Ui.MainMenu
 {
     public class MenuMainMenuScreenState : ScreenState
     {
+        [SerializeField] private LobbyMainMenuScreenState _lobbyMainMenuScreenState;
         [field: SerializeField] public Button ButtonHost { get; private set; }
         [field: SerializeField] public Button ButtonJoin { get; private set; }
 
@@ -22,12 +23,12 @@ namespace Ui.MainMenu
 
         private void HandleButtonHostClicked()
         {
-            Debug.Log("HandleButtonHostClicked");
+            Owner.SwitchState(_lobbyMainMenuScreenState);
         }
 
         private void HandleButtonJoinClicked()
         {
-            Debug.Log("HandleButtonJoinClicked");
+            Owner.SwitchState(_lobbyMainMenuScreenState);
         }
     }
 }

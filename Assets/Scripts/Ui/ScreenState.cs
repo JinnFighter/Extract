@@ -4,9 +4,10 @@ namespace Ui
 {
     public abstract class ScreenState : MonoBehaviour
     {
-        private void Start()
+        protected ScreenBase Owner { get; private set; }
+        public void SetOwner(ScreenBase screen)
         {
-            gameObject.SetActive(false);
+            Owner = screen;
         }
 
         public void EnterState()
