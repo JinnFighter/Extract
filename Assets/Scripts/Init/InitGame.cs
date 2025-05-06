@@ -12,7 +12,7 @@ namespace Init
 
         private void Start()
         {
-            SceneManager.LoadScene("MainMenu");
+            SceneManager.LoadScene("MainMenu", LoadSceneMode.Additive);
         }
     }
 }

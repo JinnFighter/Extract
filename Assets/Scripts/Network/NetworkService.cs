@@ -10,11 +10,6 @@ namespace Network
     {
         [SerializeField] private NetworkManager _networkManager;
 
-        private void Awake()
-        {
-            DontDestroyOnLoad(this);
-        }
-
         public async UniTask<bool> Host()
         {
             if (_networkManager.ServerManager.Started) return false;
