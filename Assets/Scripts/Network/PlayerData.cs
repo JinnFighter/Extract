@@ -7,14 +7,17 @@ namespace Network
 {
     public interface IPlayerData
     {
+        bool IsLocalPlayer { get; }
         SyncVar<string> Nickname { get; }
         SyncVar<bool> IsReady { get; }
         event Action<string> OnNicknameUpdated;
         event Action<bool> OnReadyUpdated;
+        void SetReady(bool isReady);
     }
 
     public class PlayerData : NetworkBehaviour, IPlayerData
     {
+        bool IPlayerData.IsLocalPlayer => Owner.IsLocalClient;
         public SyncVar<string> Nickname { get; } = new(new SyncTypeSettings
         {
             ReadPermission = ReadPermission.ExcludeOwner,
@@ -53,13 +56,13 @@ namespace Network
             OnNicknameUpdated?.Invoke(next);
         }
 
-        [ServerRpc]
+        [ServerRpc(RunLocally = true)]
         private void SetNickName(string value)
         {
             Nickname.Value = value;
         }
 
-        [ServerRpc]
+        [ServerRpc(RunLocally = true)]
         public void SetReady(bool isReady)
         {
             IsReady.Value = isReady;

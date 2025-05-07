@@ -21,6 +21,16 @@ namespace Ui.MainMenu
             HandleNicknameUpdated(_playerData.Nickname.Value);
             _playerData.OnReadyUpdated += HandleReadyUpdated;
             HandleReadyUpdated(_playerData.IsReady.Value);
+
+            if (_playerData.IsLocalPlayer)
+            {
+                ButtonReady.gameObject.SetActive(true);
+                ButtonReady.onClick.AddListener(HandleButtonReadyClicked);
+            }
+            else
+            {
+                ButtonReady.gameObject.SetActive(false);
+            }
         }
 
         public void ResetPlayerData()
@@ -29,7 +39,16 @@ namespace Ui.MainMenu
 
             _playerData.OnNicknameUpdated -= HandleNicknameUpdated;
             _playerData.OnReadyUpdated -= HandleReadyUpdated;
+            if (_playerData.IsLocalPlayer)
+            {
+                ButtonReady.onClick.RemoveListener(HandleButtonReadyClicked);
+            }
             _playerData = null;
+        }
+
+        private void HandleButtonReadyClicked()
+        {
+            _playerData.SetReady(!_playerData.IsReady.Value);
         }
 
         private void HandleReadyUpdated(bool obj)
