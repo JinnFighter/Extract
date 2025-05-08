@@ -1,4 +1,7 @@
+using System;
 using System.Collections.Generic;
+using System.Linq;
+using Common;
 using FishNet.Object.Synchronizing;
 using Network;
 using TMPro;
@@ -19,6 +22,7 @@ namespace Ui.MainMenu
 
         [Inject] private NetworkService _networkService;
         [Inject] private LobbyService _lobbyService;
+        [Inject] private LoadingService _loadingService;
 
         protected override void EnterStatInner()
         {
@@ -26,6 +30,7 @@ namespace Ui.MainMenu
             {
                 ButtonStartGame.gameObject.SetActive(true);
                 TextWaitForHost.gameObject.SetActive(false);
+                ButtonStartGame.onClick.AddListener(HandleButtonStartGameClicked);
             }
             else if (_networkService.IsClientConnected())
             {
@@ -38,7 +43,21 @@ namespace Ui.MainMenu
 
         protected override void ExitStatInner()
         {
+            if (_networkService.IsHosting())
+            {
+                ButtonStartGame.onClick.RemoveListener(HandleButtonStartGameClicked);
+            }
             _lobbyService.Players.OnChange -= HandlePlayersChanged;
+        }
+
+        private void HandleButtonStartGameClicked()
+        {
+            if (_lobbyService.Players.Any(playerData => !playerData.IsReady.Value))
+            {
+                return;
+            }
+            
+            _loadingService.LoadScene("TestBattle", true);
         }
 
         private void HandlePlayersChanged(SyncListOperation op, int index, PlayerData olditem, PlayerData newitem, bool asserver)

@@ -1,10 +1,14 @@
+using Common;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using VContainer;
 
 namespace Init
 {
     public class InitGame : MonoBehaviour
     {
+        [Inject] private LoadingService _loadingService;
+
         private void Awake()
         {
             DontDestroyOnLoad(this);
@@ -12,7 +16,13 @@ namespace Init
 
         private void Start()
         {
-            SceneManager.LoadScene("MainMenu", LoadSceneMode.Additive);
+            _loadingService.Init();
+            _loadingService.LoadScene("MainMenu");
+        }
+
+        private void OnDestroy()
+        {
+            _loadingService.Terminate();
         }
     }
 }
