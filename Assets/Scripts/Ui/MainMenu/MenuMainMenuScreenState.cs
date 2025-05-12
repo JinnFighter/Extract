@@ -1,4 +1,6 @@
-using System;
+using Common;
+using FishNet;
+using FishNet.Object.Synchronizing;
 using Network;
 using TMPro;
 using UnityEngine;
@@ -10,10 +12,12 @@ namespace Ui.MainMenu
 {
     public class MenuMainMenuScreenState : ScreenState
     {
-        [SerializeField] private LobbyMainMenuScreenState _lobbyMainMenuScreenState;
         [field: SerializeField] public Button ButtonHost { get; private set; }
         [field: SerializeField] public Button ButtonJoin { get; private set; }
         [field: SerializeField] public TMP_InputField TextFieldNickname { get; private set; }
+        [field: SerializeField] public TextMeshProUGUI TextConnectionInfo { get; private set; }
+        [Inject] private LoadingService _loadingService;
+        [Inject] private LobbyService _lobbyService;
 
         [Inject] private NetworkService _networkService;
 
@@ -23,6 +27,24 @@ namespace Ui.MainMenu
             ButtonJoin.onClick.AddListener(HandleButtonJoinClicked);
             TextFieldNickname.text = GetNickname();
             TextFieldNickname.onEndEdit.AddListener(HandleTextFieldNicknameEndEdit);
+            _lobbyService.Players.OnChange += HandlePlayersChanged;
+        }
+
+        protected override void ExitStatInner()
+        {
+            ButtonHost.onClick.RemoveListener(HandleButtonHostClicked);
+            ButtonJoin.onClick.RemoveListener(HandleButtonJoinClicked);
+            TextFieldNickname.onEndEdit.RemoveListener(HandleTextFieldNicknameEndEdit);
+            _lobbyService.Players.OnChange -= HandlePlayersChanged;
+        }
+
+        private void HandlePlayersChanged(SyncListOperation op, int index, PlayerData olditem, PlayerData newitem,
+            bool asserver)
+        {
+            if (op != SyncListOperation.Add || index < 0) return;
+            if (_lobbyService.Players.Count > 1)
+                if (InstanceFinder.IsHostStarted && _lobbyService.Players.Count > 1)
+                    _loadingService.LoadScene("TestBattle", true);
         }
 
         private void HandleTextFieldNicknameEndEdit(string arg0)
@@ -31,23 +53,21 @@ namespace Ui.MainMenu
             PlayerPrefs.Save();
         }
 
-        protected override void ExitStatInner()
-        {
-            ButtonHost.onClick.RemoveListener(HandleButtonHostClicked);
-            ButtonJoin.onClick.RemoveListener(HandleButtonJoinClicked);
-        }
-
         private async void HandleButtonHostClicked()
         {
+            ButtonHost.gameObject.SetActive(false);
+            ButtonJoin.gameObject.SetActive(false);
+            TextConnectionInfo.gameObject.SetActive(true);
             await _networkService.Host();
             await _networkService.Connect();
-            Owner.SwitchState(_lobbyMainMenuScreenState);
         }
 
         private async void HandleButtonJoinClicked()
         {
+            ButtonHost.gameObject.SetActive(false);
+            ButtonJoin.gameObject.SetActive(false);
+            TextConnectionInfo.gameObject.SetActive(true);
             await _networkService.Connect();
-            Owner.SwitchState(_lobbyMainMenuScreenState);
         }
 
         private string GetNickname()
@@ -63,6 +83,7 @@ namespace Ui.MainMenu
                 nickname = $"Player_{Random.Range(1000, 9999)}";
                 PlayerPrefs.SetString("Nickname", nickname);
             }
+
             return nickname;
         }
     }

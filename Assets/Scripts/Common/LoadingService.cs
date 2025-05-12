@@ -1,10 +1,8 @@
-using System;
-using Cysharp.Threading.Tasks;
 using FishNet.Managing;
 using FishNet.Managing.Scened;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using SceneManager = FishNet.Managing.Scened.SceneManager;
+using SceneManager = UnityEngine.SceneManagement.SceneManager;
 
 namespace Common
 {
@@ -13,139 +11,58 @@ namespace Common
         [SerializeField] private NetworkManager _networkManager;
         private readonly string _loadingSceneName = "Loading";
         private string _currentSceneName;
-        private bool _isLoading;
-        private bool _isUnloading;
-        private bool _isNetworked;
         private SceneLookupData _sceneLookupData;
 
         public void Init()
         {
+            _networkManager.SceneManager.OnQueueStart += HandleQueueStart;
+            _networkManager.SceneManager.OnQueueEnd += HandleQueueEnd;
         }
 
         public void Terminate()
         {
-            _networkManager.SceneManager.OnLoadStart -= HandleLoadStart;
-            _networkManager.SceneManager.OnLoadEnd -= HandleLoadEnd;
-            _networkManager.SceneManager.OnUnloadStart -= HandleUnloadStart;
-            _networkManager.SceneManager.OnUnloadEnd -= HandleUnloadEnd;
+            _networkManager.SceneManager.OnQueueStart -= HandleQueueStart;
+            _networkManager.SceneManager.OnQueueEnd -= HandleQueueEnd;
+        }
+
+        private async void HandleQueueStart()
+        {
+            await SceneManager.LoadSceneAsync(_loadingSceneName, LoadSceneMode.Additive);
+            if (!string.IsNullOrEmpty(_currentSceneName))
+            {
+                await SceneManager.UnloadSceneAsync(_currentSceneName);
+                _currentSceneName = "";
+            }
+        }
+
+        private async void HandleQueueEnd()
+        {
+            await SceneManager.UnloadSceneAsync(_loadingSceneName);
         }
 
         public async void LoadScene(string sceneName, bool isNetworked = false)
         {
-            if (_isLoading || _isUnloading) return;
-
-            await UnityEngine.SceneManagement.SceneManager.LoadSceneAsync(_loadingSceneName, LoadSceneMode.Additive)
-                .ToUniTask();
             if (isNetworked)
             {
-                var sceneLookupData = _sceneLookupData;
-                if (!string.IsNullOrEmpty(_currentSceneName))
+                _sceneLookupData = new SceneLookupData(sceneName);
+                var sld = new SceneLoadData(_sceneLookupData)
                 {
-                    if (_isNetworked)
+                    Options = new LoadOptions
                     {
-                        UnloadNetworkedInner(sceneLookupData);
-                    }
-                    else
-                    {
-                        UnloadLocalInner(_currentSceneName);
-                    }
-                    await UniTask.WaitUntil(() => !_isUnloading);
-                }
-                LoadNetworkedInner(sceneName);
+                        AutomaticallyUnload = false
+                    },
+
+                    ReplaceScenes = ReplaceOption.None,
+                    PreferredActiveScene = new PreferredScene(_sceneLookupData)
+                };
+
+                _networkManager.SceneManager.LoadGlobalScenes(sld);
             }
             else
             {
-                var currentScene = _currentSceneName;
-                if (!string.IsNullOrEmpty(currentScene))
-                {
-                    if (_isNetworked)
-                    {
-                        UnloadNetworkedInner(_sceneLookupData);
-                    }
-                    else
-                    {
-                        UnloadLocalInner(_currentSceneName);
-                    }
-                    await UniTask.WaitUntil(() => !_isUnloading);
-                }
-
-                LoadLocalInner(sceneName);
+                await SceneManager.LoadSceneAsync(sceneName, LoadSceneMode.Additive);
+                _currentSceneName = sceneName;
             }
-
-            await UniTask.WaitUntil(() => !_isLoading);
-            await UnityEngine.SceneManagement.SceneManager.UnloadSceneAsync(_loadingSceneName).ToUniTask();
-        }
-
-        private void LoadNetworkedInner(string sceneName)
-        {
-            _isLoading = true;
-            _sceneLookupData = new SceneLookupData(sceneName);
-            var sld = new SceneLoadData(_sceneLookupData)
-            {
-                Options = new LoadOptions
-                {
-                    AutomaticallyUnload = false
-                },
-
-                ReplaceScenes = ReplaceOption.None,
-                PreferredActiveScene = new PreferredScene(_sceneLookupData)
-            };
-
-            _networkManager.SceneManager.OnLoadStart += HandleLoadStart;
-            _networkManager.SceneManager.OnUnloadEnd += HandleUnloadEnd;
-            _networkManager.SceneManager.LoadGlobalScenes(sld);
-        }
-
-        private async void LoadLocalInner(string sceneName)
-        {
-            _isLoading = true;
-            await UnityEngine.SceneManagement.SceneManager.LoadSceneAsync(sceneName, LoadSceneMode.Additive)
-                .ToUniTask();
-            _currentSceneName = sceneName;
-            _isNetworked = false;
-            _isLoading = false;
-        }
-
-        private async void UnloadLocalInner(string sceneName)
-        {
-            _isUnloading = true;
-            await UnityEngine.SceneManagement.SceneManager.UnloadSceneAsync(sceneName).ToUniTask();
-            _isUnloading = false;
-        }
-
-        private void UnloadNetworkedInner(SceneLookupData sceneLookupData)
-        {
-            _isUnloading = true;
-            var unloadData = new SceneUnloadData(sceneLookupData);
-
-            _networkManager.SceneManager.OnUnloadStart += HandleUnloadStart;
-            _networkManager.SceneManager.OnUnloadEnd += HandleUnloadEnd;
-            _networkManager.SceneManager.UnloadGlobalScenes(unloadData);
-        }
-
-        private void HandleUnloadStart(SceneUnloadStartEventArgs obj)
-        {
-            _networkManager.SceneManager.OnUnloadStart -= HandleUnloadStart;
-        }
-
-        private void HandleUnloadEnd(SceneUnloadEndEventArgs obj)
-        {
-            _networkManager.SceneManager.OnUnloadEnd -= HandleUnloadEnd;
-            _isUnloading = false;
-        }
-
-        private void HandleLoadEnd(SceneLoadEndEventArgs obj)
-        {
-            _networkManager.SceneManager.OnLoadEnd -= HandleLoadEnd;
-            _currentSceneName = obj.LoadedScenes[0].name;
-            _isNetworked = true;
-            _isLoading = false;
-        }
-
-        private void HandleLoadStart(SceneLoadStartEventArgs obj)
-        {
-            _networkManager.SceneManager.OnLoadStart -= HandleLoadStart;
-            _networkManager.SceneManager.OnLoadEnd += HandleLoadEnd;
         }
     }
 }
