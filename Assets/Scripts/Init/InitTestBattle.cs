@@ -12,7 +12,8 @@ namespace Init
         private void Start()
         {
             var tileEntityModels = SetupGameField();
-            _battleInstance.Init(tileEntityModels);
+            var unitEntityModels = SetupUnits();
+            _battleInstance.Init(tileEntityModels, unitEntityModels);
         }
 
         private void OnDestroy()
@@ -34,6 +35,12 @@ namespace Init
                 dict[kvp.Key] = tileEntityModel;
             }
 
+            return dict;
+        }
+
+        private Dictionary<int, IUnitEntityModel> SetupUnits()
+        {
+            var dict = new Dictionary<int, IUnitEntityModel>();
             return dict;
         }
     }
