@@ -1,47 +1,31 @@
-using System.Collections.Generic;
+using System.Linq;
+using Common;
+using Cysharp.Threading.Tasks;
 using Logic;
 using UnityEngine;
+using VContainer;
 
 namespace Init
 {
     public class InitTestBattle : MonoBehaviour
     {
         [SerializeField] private GameFieldSetup _gameFieldSetup;
-        private readonly BattleInstance _battleInstance = new();
+        [SerializeField] private BattleInstance _battleInstance;
+        [Inject] private LobbyService _lobbyService;
+        [Inject] private NetworkService _networkService;
+        [Inject] private UserDataService _userDataService;
 
-        private void Start()
+        private async void Start()
         {
-            var tileEntityModels = SetupGameField();
-            var unitEntityModels = SetupUnits();
-            _battleInstance.Init(tileEntityModels, unitEntityModels);
+            _userDataService.LocalPlayer.SetReady(true);
+            if (_networkService.IsHosting())
+                await UniTask.WaitUntil(() => _lobbyService.Players.All(player => player.IsReady));
+            _battleInstance.Init();
         }
 
         private void OnDestroy()
         {
-            _battleInstance.Terminate();
-        }
-
-        private Dictionary<Vector2Int, ITileEntityModel> SetupGameField()
-        {
-            var dict = new Dictionary<Vector2Int, ITileEntityModel>();
-            foreach (var kvp in _gameFieldSetup.TilesSetup)
-            {
-                var tileEntityModel = new TileEntityModel
-                {
-                    Position = kvp.Key,
-                    IsWalkable = kvp.Value.Walkable,
-                    WorldPosition = kvp.Value.transform.position
-                };
-                dict[kvp.Key] = tileEntityModel;
-            }
-
-            return dict;
-        }
-
-        private Dictionary<int, IUnitEntityModel> SetupUnits()
-        {
-            var dict = new Dictionary<int, IUnitEntityModel>();
-            return dict;
+            _battleInstance?.Terminate();
         }
     }
 }

@@ -4455,6 +4455,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   <LeftBoundary>k__BackingField: {fileID: 102839677}
   <RightBoundary>k__BackingField: {fileID: 979731071}
+  <Team1SpawnPoints>k__BackingField:
+  - {x: -8.5, y: 0, z: -10.5}
+  - {x: -2.5, y: 0, z: -11.5}
+  - {x: -9.5, y: 0, z: -9.5}
+  <Team2SpawnPoints>k__BackingField:
+  - {x: 19.5, y: 0, z: 9.5}
+  - {x: 23.5, y: 0, z: 7.5}
+  - {x: 19.5, y: 0, z: 6.5}
   _dataTilemap: {fileID: 1653504818}
   _objectsTilemap: {fileID: 625273291}
   _areaTilemap: {fileID: 1112527110}
@@ -55232,6 +55240,124 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   <Walkable>k__BackingField: 1
+--- !u!1 &1183684038
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1183684041}
+  - component: {fileID: 1183684040}
+  - component: {fileID: 1183684039}
+  - component: {fileID: 1183684042}
+  m_Layer: 0
+  m_Name: BattleInstance
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1183684039
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1183684038}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 26b716c41e9b56b4baafaf13a523ba2e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  <IsNested>k__BackingField: 0
+  WasActiveDuringEdit: 1
+  WasActiveDuringEdit_Set: 1
+  <ComponentIndex>k__BackingField: 0
+  <PredictedSpawn>k__BackingField: {fileID: 0}
+  <PredictedOwner>k__BackingField: {fileID: 0}
+  NetworkBehaviours: []
+  InitializedParentNetworkBehaviour: {fileID: 0}
+  InitializedNestedNetworkObjects: []
+  RuntimeParentNetworkBehaviour: {fileID: 0}
+  RuntimeChildNetworkBehaviours: []
+  _isNetworked: 1
+  _isSpawnable: 0
+  _isGlobal: 0
+  _initializeOrder: 0
+  _preventDespawnOnDisconnect: 0
+  _defaultDespawnType: 0
+  NetworkObserver: {fileID: 0}
+  _enablePrediction: 0
+  _predictionType: 0
+  _graphicalObject: {fileID: 0}
+  _detachGraphicalObject: 0
+  _enableStateForwarding: 1
+  _networkTransform: {fileID: 0}
+  _ownerInterpolation: 1
+  _ownerSmoothedProperties: 255
+  _adaptiveInterpolation: 3
+  _spectatorSmoothedProperties: 255
+  _spectatorInterpolation: 2
+  _enableTeleport: 0
+  _teleportThreshold: 1
+  <PrefabId>k__BackingField: 65535
+  <SpawnableCollectionId>k__BackingField: 0
+  <AssetPathHash>k__BackingField: 0
+  <SceneId>k__BackingField: 3984297214
+  SerializedTransformProperties:
+    Position: {x: 0, y: 0, z: 0}
+    Rotation: {x: 0, y: 0, z: 0, w: 0}
+    Scale: {x: 0, y: 0, z: 0}
+    IsValid: 0
+--- !u!114 &1183684040
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1183684038}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1e25a0a025c2229468aab0c294a60186, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _componentIndexCache: 255
+  _addedNetworkObject: {fileID: 1183684039}
+  _networkObjectCache: {fileID: 0}
+  _gameFieldSetup: {fileID: 111411633}
+--- !u!4 &1183684041
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1183684038}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1183684042
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1183684038}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c71fd7f855ec523429999fc4e14a1928, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _overrideType: 3
+  _updateHostVisibility: 1
+  _observerConditions:
+  - {fileID: 11400000, guid: 2033f54fd2794464bae08fa5a55c8996, type: 2}
 --- !u!1001 &1184733908
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -93517,6 +93643,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2042204162}
   - component: {fileID: 2042204163}
+  - component: {fileID: 2042204164}
   m_Layer: 0
   m_Name: Init
   m_TagString: Untagged
@@ -93552,6 +93679,25 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _gameFieldSetup: {fileID: 111411633}
+  _battleInstance: {fileID: 1183684040}
+--- !u!114 &2042204164
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2042204161}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 982427f5adfa7cf4297c193a4927f49c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  parentReference:
+    TypeName: Init.GameLifetimeScope
+  autoRun: 1
+  autoInjectGameObjects:
+  - {fileID: 2042204161}
+  - {fileID: 1183684038}
 --- !u!1 &2044685742
 GameObject:
   m_ObjectHideFlags: 0
@@ -98723,3 +98869,4 @@ SceneRoots:
   - {fileID: 111411634}
   - {fileID: 979731071}
   - {fileID: 102839677}
+  - {fileID: 1183684041}

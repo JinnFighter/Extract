@@ -9,6 +9,8 @@ namespace Logic
     {
         [field: SerializeField] public Transform LeftBoundary { get; private set; }
         [field: SerializeField] public Transform RightBoundary { get; private set; }
+        [field: SerializeField] public List<Vector3> Team1SpawnPoints { get; private set; }
+        [field: SerializeField] public List<Vector3> Team2SpawnPoints { get; private set; }
 
         [SerializeField] private Transform _dataTilemap;
         [SerializeField] private Tilemap _objectsTilemap;
@@ -28,7 +30,7 @@ namespace Logic
             {
                 var obj = new GameObject($"Tile {i}-{j}");
                 obj.transform.SetParent(_dataTilemap.transform);
-                obj.transform.position = _areaTilemap.CellToWorld(new Vector3Int(i, j, 0)) + new Vector3(0.5f, 0, 0.5f);
+                obj.transform.position = _areaTilemap.GetCellCenterWorld(new Vector3Int(i, j, 0));
                 var setup = obj.AddComponent<TileSetup>();
                 TilesSetup.Add(new Vector2Int(i, j), setup);
             }

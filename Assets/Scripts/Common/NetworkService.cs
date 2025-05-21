@@ -1,14 +1,19 @@
 using System;
 using Cysharp.Threading.Tasks;
+using FishNet.Connection;
 using FishNet.Managing;
+using FishNet.Object;
 using FishNet.Transporting;
 using UnityEngine;
 
-namespace Network
+namespace Common
 {
     public class NetworkService : MonoBehaviour
     {
+        [SerializeField] private PlayerData _playerDataPrefab;
         [SerializeField] private NetworkManager _networkManager;
+
+        public event Action<NetworkObject> OnClientConnected;
 
         public async UniTask<bool> Host()
         {
@@ -24,6 +29,7 @@ namespace Network
             }
 
             await UniTask.WaitUntil(() => _networkManager.ServerManager.Started);
+            _networkManager.ServerManager.OnRemoteConnectionState += HandleRemoteConnectionState;
             return true;
         }
 
@@ -81,6 +87,14 @@ namespace Network
         public bool IsClientConnected()
         {
             return _networkManager.ClientManager.Started;
+        }
+
+        private void HandleRemoteConnectionState(NetworkConnection arg1, RemoteConnectionStateArgs arg2)
+        {
+            if (arg2.ConnectionState != RemoteConnectionState.Started) return;
+
+            var playerData = Instantiate(_playerDataPrefab);
+            _networkManager.ServerManager.Spawn(playerData.gameObject);
         }
     }
 }

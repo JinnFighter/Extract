@@ -1,4 +1,4 @@
-using Network;
+using Common;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -18,9 +18,9 @@ namespace Ui.MainMenu
             if (_playerData != null) return;
             _playerData = playerData;
             _playerData.OnNicknameUpdated += HandleNicknameUpdated;
-            HandleNicknameUpdated(_playerData.Nickname.Value);
+            HandleNicknameUpdated(_playerData.Nickname);
             _playerData.OnReadyUpdated += HandleReadyUpdated;
-            HandleReadyUpdated(_playerData.IsReady.Value);
+            HandleReadyUpdated(_playerData.IsReady);
 
             if (_playerData.IsLocalPlayer)
             {
@@ -48,7 +48,7 @@ namespace Ui.MainMenu
 
         private void HandleButtonReadyClicked()
         {
-            _playerData.SetReady(!_playerData.IsReady.Value);
+            _playerData.SetReady(!_playerData.IsReady);
         }
 
         private void HandleReadyUpdated(bool obj)
