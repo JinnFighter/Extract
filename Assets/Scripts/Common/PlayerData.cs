@@ -19,6 +19,7 @@ namespace Common
     public class PlayerDataLocal : IPlayerData
     {
         private PlayerData _netPlayerData;
+        private string _localNickname;
         public bool IsLocalPlayer => true;
         public string Nickname => _netPlayerData?.Nickname;
         public bool IsReady => _netPlayerData?.IsReady ?? false;
@@ -27,11 +28,24 @@ namespace Common
 
         public void SetNetPlayerData(PlayerData netPlayerData)
         {
+            if (_netPlayerData != null)
+            {
+                _netPlayerData.OnNicknameUpdated -= HandleNetNicknameUpdated;
+            }
             _netPlayerData = netPlayerData;
+            if (_netPlayerData != null)
+            {
+                _netPlayerData.OnNicknameUpdated += HandleNetNicknameUpdated;
+                SetNickname(_localNickname);
+            }
         }
 
         public void ResetNetPlayerData()
         {
+            if (_netPlayerData != null)
+            {
+                _netPlayerData.OnNicknameUpdated -= HandleNetNicknameUpdated;
+            }
             _netPlayerData = null;
         }
         
@@ -42,9 +56,16 @@ namespace Common
 
         public void SetNickname(string nickname)
         {
+            _localNickname = nickname;
             _netPlayerData?.SetNickname(nickname);
+            PlayerPrefs.SetString("Nickname", _localNickname);
+            PlayerPrefs.Save();
         }
-        
+
+        private void HandleNetNicknameUpdated(string name)
+        {
+            OnNicknameUpdated?.Invoke(name);
+        }
     }
 
     public class PlayerData : NetworkBehaviour, IPlayerData
@@ -80,13 +101,21 @@ namespace Common
 
         public override void OnStartClient()
         {
-            if (IsOwner) SetNickname(PlayerPrefs.GetString("Nickname"));
+            if (IsOwner)
+            {
+                AutoResolver.Resolve<UserDataService>().SetNetPlayerData(this);
+                SetNickname(PlayerPrefs.GetString("Nickname"));
+            }
             _nickname.OnChange += HandleNicknameChanged;
             _isReady.OnChange += HandleIsReadyChanged;
         }
 
         public override void OnStopClient()
         { 
+            if (IsOwner)
+            {
+                AutoResolver.Resolve<UserDataService>().ResetNetPlayerData();
+            }
             _nickname.OnChange -= HandleNicknameChanged;
             _isReady.OnChange -= HandleIsReadyChanged;
         }
