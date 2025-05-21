@@ -1,4 +1,5 @@
 using System.Linq;
+using Client;
 using Common;
 using Cysharp.Threading.Tasks;
 using Logic;
@@ -11,6 +12,7 @@ namespace Init
     {
         [SerializeField] private GameFieldSetup _gameFieldSetup;
         [SerializeField] private BattleInstance _battleInstance;
+        [SerializeField] private UnitSpawner _unitSpawner;
         [Inject] private LobbyService _lobbyService;
         [Inject] private NetworkService _networkService;
         [Inject] private UserDataService _userDataService;
@@ -18,14 +20,15 @@ namespace Init
         private async void Start()
         {
             _userDataService.LocalPlayer.SetReady(true);
-            if (_networkService.IsHosting())
-                await UniTask.WaitUntil(() => _lobbyService.Players.All(player => player.IsReady));
+            await UniTask.WaitUntil(() => _lobbyService.Players.All(player => player.IsReady));
+            _unitSpawner.Init();
             _battleInstance.Init();
         }
 
         private void OnDestroy()
         {
             _battleInstance?.Terminate();
+            _unitSpawner?.Terminate();
         }
     }
 }

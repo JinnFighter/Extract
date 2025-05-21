@@ -91,12 +91,12 @@ namespace Common
 
         public override void OnStartServer()
         {
-            AutoResolver.Resolve<LobbyService>().Players.Add(this);
+            //AutoResolver.Resolve<LobbyService>().Players.Add(this);
         }
 
         public override void OnStopServer()
         {
-            AutoResolver.Resolve<LobbyService>().Players.Add(this);
+            //AutoResolver.Resolve<LobbyService>().Players.Add(this);
         }
 
         public override void OnStartClient()

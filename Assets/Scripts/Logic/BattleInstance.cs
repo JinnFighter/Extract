@@ -1,6 +1,9 @@
+using System;
 using System.Collections.Generic;
 using Common;
+using FishNet.Broadcast;
 using FishNet.Object;
+using FishNet.Transporting;
 using UnityEngine;
 using VContainer;
 
@@ -8,31 +11,35 @@ namespace Logic
 {
     public class BattleInstance : NetworkBehaviour
     {
+        public event Action<GameSetupInfo> OnGameSetup;
         [SerializeField] private GameFieldSetup _gameFieldSetup;
         [Inject] private LobbyService _lobbyService;
-        private Dictionary<Vector2Int, ITileEntityModel> _tileEntityModels = new();
-        private Dictionary<int, IUnitEntityModel> _unitEntityModels = new();
+        public Dictionary<Vector2Int, ITileEntityModel> TileEntityModels = new();
+        public Dictionary<int, IUnitEntityModel> UnitEntityModels = new();
+        [Inject] private NetworkService _networkService;
 
         public void Init()
         {
+            _networkService.SubscribeClientBroadcast<GameSetupInfo>(HandleBroadcastGameSetupInfo);
             if (IsServerInitialized) SetupGameServer();
         }
-
+        
         public void Terminate()
         {
-            _unitEntityModels?.Clear();
-            _unitEntityModels = null;
-            _tileEntityModels?.Clear();
-            _tileEntityModels = null;
+            _networkService.UnsubscribeClientBroadcast<GameSetupInfo>(HandleBroadcastGameSetupInfo);
+            UnitEntityModels?.Clear();
+            UnitEntityModels = null;
+            TileEntityModels?.Clear();
+            TileEntityModels = null;
         }
-
-        [Rpc(RunLocally = true)]
+        
         private void SetupGame(GameSetupInfo gameSetupInfo)
         {
-            _tileEntityModels = SetupGameField();
-            _unitEntityModels = SetupUnits(gameSetupInfo);
-            Debug.Log($"_tiles: {_tileEntityModels.Count}");
-            Debug.Log($"_units: {_unitEntityModels.Count}");
+            TileEntityModels = SetupGameField();
+            UnitEntityModels = SetupUnits(gameSetupInfo);
+            Debug.Log($"_tiles: {TileEntityModels.Count}");
+            Debug.Log($"_units: {UnitEntityModels.Count}");
+            OnGameSetup?.Invoke(gameSetupInfo);
         }
 
         private void SetupGameServer()
@@ -60,21 +67,22 @@ namespace Logic
             {
                 UnitsSetupInfo = unitsSetupInfo
             };
-            SetupGame(setupInfo);
+            _networkService.SendServerBroadcast(setupInfo);
         }
 
         private Dictionary<Vector2Int, ITileEntityModel> SetupGameField()
         {
+            Debug.Log(_gameFieldSetup.TileSetups.Count);
             var dict = new Dictionary<Vector2Int, ITileEntityModel>();
-            foreach (var kvp in _gameFieldSetup.TilesSetup)
+            foreach (var tileSetup in _gameFieldSetup.TileSetups)
             {
                 var tileEntityModel = new TileEntityModel
                 {
-                    Position = kvp.Key,
-                    IsWalkable = kvp.Value.Walkable,
-                    WorldPosition = kvp.Value.transform.position
+                    Position = tileSetup.TilePosition,
+                    IsWalkable = tileSetup.Walkable,
+                    WorldPosition = tileSetup.transform.position
                 };
-                dict[kvp.Key] = tileEntityModel;
+                dict[tileSetup.TilePosition] = tileEntityModel;
             }
 
             return dict;
@@ -83,12 +91,24 @@ namespace Logic
         private Dictionary<int, IUnitEntityModel> SetupUnits(GameSetupInfo gameSetupInfo)
         {
             var dict = new Dictionary<int, IUnitEntityModel>();
-            foreach (var unit in gameSetupInfo.UnitsSetupInfo) dict[unit.Id] = new UnitEntityModel();
+            foreach (var unit in gameSetupInfo.UnitsSetupInfo)
+                dict[unit.Id] = new UnitEntityModel
+                {
+                    Id = unit.Id,
+                    OwnerId = unit.OwnerId,
+                    Position = new Vector2Int((int)unit.SpawnPosition.x, (int)unit.SpawnPosition.y),
+                    WorldPosition = unit.SpawnPosition
+                };
             return dict;
+        }
+        
+        private void HandleBroadcastGameSetupInfo(GameSetupInfo arg1, Channel arg2)
+        {
+            SetupGame(arg1);
         }
     }
 
-    public struct GameSetupInfo
+    public struct GameSetupInfo : IBroadcast
     {
         public List<UnitSetupInfo> UnitsSetupInfo;
     }
@@ -99,6 +119,6 @@ namespace Logic
         public string NameId;
         public int OwnerId;
         public int TeamId;
-        public Vector2 SpawnPosition;
+        public Vector3 SpawnPosition;
     }
 }

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
@@ -15,11 +16,11 @@ namespace Logic
         [SerializeField] private Transform _dataTilemap;
         [SerializeField] private Tilemap _objectsTilemap;
         [SerializeField] private Tilemap _areaTilemap;
-        public Dictionary<Vector2Int, TileSetup> TilesSetup { get; } = new();
+        [field: SerializeField] public List<TileSetup> TileSetups { get; set; } = new();
 
         public void Setup()
         {
-            TilesSetup.Clear();
+            TileSetups.Clear();
             for (var i = _dataTilemap.transform.childCount; i > 0; --i)
                 DestroyImmediate(_dataTilemap.transform.GetChild(0).gameObject);
 
@@ -32,8 +33,14 @@ namespace Logic
                 obj.transform.SetParent(_dataTilemap.transform);
                 obj.transform.position = _areaTilemap.GetCellCenterWorld(new Vector3Int(i, j, 0));
                 var setup = obj.AddComponent<TileSetup>();
-                TilesSetup.Add(new Vector2Int(i, j), setup);
+                setup.TilePosition = new Vector2Int(i, j);
+                Undo.RecordObject(setup, "Setup");
+                EditorUtility.SetDirty(setup); 
+                TileSetups.Add(setup);
             }
+            
+            Undo.RecordObject(this, "Test Scriptable Editor Modify"); 
+            EditorUtility.SetDirty(this); 
         }
     }
 
@@ -41,11 +48,20 @@ namespace Logic
     [CustomEditor(typeof(GameFieldSetup))]
     public class GameFieldSetupEditor : Editor
     {
+        private SerializedProperty _tileSetupsProperty;
+        private void OnEnable()
+        {
+            _tileSetupsProperty = serializedObject.FindProperty("TileSetups");
+        }
+
         public override void OnInspectorGUI()
         {
             DrawDefaultInspector();
 
-            if (GUILayout.Button("Generate Game Field Setup")) ((GameFieldSetup)target).Setup();
+            if (GUILayout.Button("Generate Game Field Setup"))
+            {
+                ((GameFieldSetup)target).Setup();
+            }
         }
     }
 }

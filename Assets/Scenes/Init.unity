@@ -397,6 +397,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1575079390}
   - component: {fileID: 1575079389}
+  - component: {fileID: 1575079391}
   m_Layer: 0
   m_Name: Network
   m_TagString: Untagged
@@ -438,6 +439,21 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1575079391
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1575079388}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 211a9f6ec51ddc14f908f5acc0cd0423, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _playerPrefab: {fileID: 5573914103859764535, guid: 1e6a2356f1bd57141be4c1b2c02a2f8f, type: 3}
+  _addToDefaultScene: 1
+  Spawns: []
 --- !u!1 &2042204161
 GameObject:
   m_ObjectHideFlags: 0
@@ -619,6 +635,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _playerDataPrefab: {fileID: 7117734391054663535, guid: 1e6a2356f1bd57141be4c1b2c02a2f8f, type: 3}
   _networkManager: {fileID: 1575079389}
+  _playerSpawner: {fileID: 1575079391}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

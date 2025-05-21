@@ -1,10 +1,14 @@
 using System;
 using Cysharp.Threading.Tasks;
+using FishNet.Broadcast;
+using FishNet.Component.Spawning;
 using FishNet.Connection;
 using FishNet.Managing;
 using FishNet.Object;
 using FishNet.Transporting;
 using UnityEngine;
+using VContainer;
+using Channel = FishNet.Transporting.Channel;
 
 namespace Common
 {
@@ -12,8 +16,24 @@ namespace Common
     {
         [SerializeField] private PlayerData _playerDataPrefab;
         [SerializeField] private NetworkManager _networkManager;
+        [SerializeField] private PlayerSpawner _playerSpawner;
 
-        public event Action<NetworkObject> OnClientConnected;
+        [Inject] private LobbyService _lobbyService;
+
+        private void Awake()
+        {
+            _playerSpawner.OnSpawned += HandlePlayerObjectSpawned;
+        }
+
+        private void OnDestroy()
+        {
+            _playerSpawner.OnSpawned -= HandlePlayerObjectSpawned;
+        }
+
+        private void HandlePlayerObjectSpawned(NetworkObject obj)
+        {
+            _lobbyService.Players.Add(obj.GetComponent<PlayerData>());
+        }
 
         public async UniTask<bool> Host()
         {
@@ -29,7 +49,6 @@ namespace Common
             }
 
             await UniTask.WaitUntil(() => _networkManager.ServerManager.Started);
-            _networkManager.ServerManager.OnRemoteConnectionState += HandleRemoteConnectionState;
             return true;
         }
 
@@ -79,22 +98,68 @@ namespace Common
             return isSuccess;
         }
 
-        public bool IsHosting()
+        public void SubscribeServerBroadcast<T>(Action<NetworkConnection, T, Channel> action)
+            where T : struct, IBroadcast
         {
-            return _networkManager.ServerManager.Started;
+            SubscribeServerBroadcastInner(action);
         }
 
-        public bool IsClientConnected()
+        public void UnsubscribeServerBroadcast<T>(Action<NetworkConnection, T, Channel> action)
+            where T : struct, IBroadcast
         {
-            return _networkManager.ClientManager.Started;
+            UnsubscribeServerBroadcastInner(action);
         }
 
-        private void HandleRemoteConnectionState(NetworkConnection arg1, RemoteConnectionStateArgs arg2)
+        public void SubscribeClientBroadcast<T>(Action<T, Channel> action) where T : struct, IBroadcast
         {
-            if (arg2.ConnectionState != RemoteConnectionState.Started) return;
+            SubscribeClientBroadcastInner(action);
+        }
 
-            var playerData = Instantiate(_playerDataPrefab);
-            _networkManager.ServerManager.Spawn(playerData.gameObject);
+        public void UnsubscribeClientBroadcast<T>(Action<T, Channel> action) where T : struct, IBroadcast
+        {
+            UnsubscribeClientBroadcastInner(action);
+        }
+
+        public void SendServerBroadcast<T>(T broadcast) where T : struct, IBroadcast
+        {
+            SendServerBroadcastInner(broadcast);
+        }
+
+        public void SendClientBroadcast<T>(T broadcast) where T : struct, IBroadcast
+        {
+            SendClientBroadcastInner(broadcast);
+        }
+
+        private void SubscribeServerBroadcastInner<T>(Action<NetworkConnection, T, Channel> action)
+            where T : struct, IBroadcast
+        {
+            _networkManager.ServerManager.RegisterBroadcast(action);
+        }
+
+        private void UnsubscribeServerBroadcastInner<T>(Action<NetworkConnection, T, Channel> action)
+            where T : struct, IBroadcast
+        {
+            _networkManager.ServerManager.UnregisterBroadcast(action);
+        }
+
+        private void SubscribeClientBroadcastInner<T>(Action<T, Channel> action) where T : struct, IBroadcast
+        {
+            _networkManager.ClientManager.RegisterBroadcast(action);
+        }
+
+        private void UnsubscribeClientBroadcastInner<T>(Action<T, Channel> action) where T : struct, IBroadcast
+        {
+            _networkManager.ClientManager.UnregisterBroadcast(action);
+        }
+
+        private void SendServerBroadcastInner<T>(T broadcast) where T : struct, IBroadcast
+        {
+            _networkManager.ServerManager.Broadcast(broadcast);
+        }
+
+        private void SendClientBroadcastInner<T>(T broadcast) where T : struct, IBroadcast
+        {
+            _networkManager.ClientManager.Broadcast(broadcast);
         }
     }
 }

@@ -5,6 +5,7 @@ namespace Logic
     public class TileSetup : MonoBehaviour
     {
         [field: SerializeField] public bool Walkable { get; private set; } = true;
+        [field: SerializeField] public Vector2Int TilePosition { get; set; }
 
         private void OnDrawGizmos()
         {
