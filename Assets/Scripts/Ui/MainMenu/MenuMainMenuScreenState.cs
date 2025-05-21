@@ -1,7 +1,6 @@
 using Common;
 using FishNet;
 using FishNet.Object.Synchronizing;
-using Network;
 using TMPro;
 using UnityEngine;
 using VContainer;
@@ -18,14 +17,14 @@ namespace Ui.MainMenu
         [field: SerializeField] public TextMeshProUGUI TextConnectionInfo { get; private set; }
         [Inject] private LoadingService _loadingService;
         [Inject] private LobbyService _lobbyService;
-
+        [Inject] private UserDataService _userDataService;
         [Inject] private NetworkService _networkService;
 
         protected override void EnterStatInner()
         {
             ButtonHost.onClick.AddListener(HandleButtonHostClicked);
             ButtonJoin.onClick.AddListener(HandleButtonJoinClicked);
-            TextFieldNickname.text = GetNickname();
+            TextFieldNickname.text = _userDataService.LocalPlayer.Nickname;
             TextFieldNickname.onEndEdit.AddListener(HandleTextFieldNicknameEndEdit);
             _lobbyService.Players.OnChange += HandlePlayersChanged;
         }
@@ -49,8 +48,7 @@ namespace Ui.MainMenu
 
         private void HandleTextFieldNicknameEndEdit(string arg0)
         {
-            PlayerPrefs.SetString("Nickname", arg0);
-            PlayerPrefs.Save();
+            _userDataService.LocalPlayer.SetNickname(arg0);
         }
 
         private async void HandleButtonHostClicked()
@@ -68,23 +66,6 @@ namespace Ui.MainMenu
             ButtonJoin.gameObject.SetActive(false);
             TextConnectionInfo.gameObject.SetActive(true);
             await _networkService.Connect();
-        }
-
-        private string GetNickname()
-        {
-            var nickname = "Unknown";
-            if (PlayerPrefs.HasKey("Nickname"))
-            {
-                nickname = PlayerPrefs.GetString("Nickname");
-                PlayerPrefs.Save();
-            }
-            else
-            {
-                nickname = $"Player_{Random.Range(1000, 9999)}";
-                PlayerPrefs.SetString("Nickname", nickname);
-            }
-
-            return nickname;
         }
     }
 }

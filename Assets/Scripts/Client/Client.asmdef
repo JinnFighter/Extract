@@ -1,11 +1,11 @@
 {
-    "name": "Logic",
+    "name": "Client",
     "rootNamespace": "",
     "references": [
-        "GUID:7c88a4a7926ee5145ad2dfa06f454c67",
+        "GUID:0d1d926614004b64986ea9563a5ade2c",
         "GUID:b0214a6008ed146ff8f122a6a9c2f6cc",
-        "GUID:86b58529fb8cb4448925cd8463750eea",
-        "GUID:8160b511805166e439f791a0393009d9"
+        "GUID:8160b511805166e439f791a0393009d9",
+        "GUID:86b58529fb8cb4448925cd8463750eea"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
