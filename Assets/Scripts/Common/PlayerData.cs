@@ -10,6 +10,7 @@ namespace Common
         bool IsLocalPlayer { get; }
         string Nickname { get; }
         bool IsReady { get; }
+        int Id { get; }
         event Action<string> OnNicknameUpdated;
         event Action<bool> OnReadyUpdated;
         void SetReady(bool isReady);
@@ -23,6 +24,7 @@ namespace Common
         public bool IsLocalPlayer => true;
         public string Nickname => _netPlayerData?.Nickname;
         public bool IsReady => _netPlayerData?.IsReady ?? false;
+        public int Id => _netPlayerData?.OwnerId ?? 1;
         public event Action<string> OnNicknameUpdated;
         public event Action<bool> OnReadyUpdated;
 
@@ -73,6 +75,7 @@ namespace Common
         bool IPlayerData.IsLocalPlayer => Owner.IsLocalClient;
         public string Nickname => _nickname.Value;
         public bool IsReady => _isReady.Value;
+        public int Id => OwnerId;
 
         private SyncVar<string> _nickname { get; } = new(new SyncTypeSettings
         {
@@ -88,16 +91,6 @@ namespace Common
 
         public event Action<string> OnNicknameUpdated;
         public event Action<bool> OnReadyUpdated;
-
-        public override void OnStartServer()
-        {
-            //AutoResolver.Resolve<LobbyService>().Players.Add(this);
-        }
-
-        public override void OnStopServer()
-        {
-            //AutoResolver.Resolve<LobbyService>().Players.Add(this);
-        }
 
         public override void OnStartClient()
         {

@@ -1,8 +1,8 @@
-using System.Linq;
 using Client;
 using Common;
-using Cysharp.Threading.Tasks;
 using Logic;
+using Ui.Battle;
+using UiService;
 using UnityEngine;
 using VContainer;
 
@@ -16,17 +16,22 @@ namespace Init
         [Inject] private LobbyService _lobbyService;
         [Inject] private NetworkService _networkService;
         [Inject] private UserDataService _userDataService;
+        [Inject] private IUiService _uiService;
+        private BattleScreenModel _battleScreenModel;
 
-        private async void Start()
+        private void Start()
         {
-            _userDataService.LocalPlayer.SetReady(true);
-            await UniTask.WaitUntil(() => _lobbyService.Players.All(player => player.IsReady));
             _unitSpawner.Init();
             _battleInstance.Init();
+            _battleScreenModel = new BattleScreenModel(new BattleScreenStateModelAlly(),
+                new BattleScreenStateModelEnemy(), _battleInstance, _userDataService);
+            _uiService.Open<UiBattleScreen>(_battleScreenModel, typeof(BattleScreenView));
         }
 
         private void OnDestroy()
         {
+            _uiService.Close(_battleScreenModel);
+            _battleScreenModel = null;
             _battleInstance?.Terminate();
             _unitSpawner?.Terminate();
         }
