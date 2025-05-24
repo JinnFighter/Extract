@@ -8,7 +8,7 @@ namespace Common
         private readonly PlayerDataLocal _playerDataLocal = new();
         public IPlayerData LocalPlayer => _playerDataLocal;
 
-        private void Awake()
+        public void Init()
         {
             var nickname = "Unknown";
             if (PlayerPrefs.HasKey("Nickname"))
@@ -23,6 +23,11 @@ namespace Common
             }
 
             _playerDataLocal.SetNickname(nickname);
+        }
+
+        public void Terminate()
+        {
+            ResetNetPlayerData();
         }
 
         public void SetNetPlayerData(PlayerData playerData)

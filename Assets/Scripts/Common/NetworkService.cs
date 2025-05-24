@@ -20,12 +20,12 @@ namespace Common
 
         [Inject] private LobbyService _lobbyService;
 
-        private void Awake()
+        public void Init()
         {
             _playerSpawner.OnSpawned += HandlePlayerObjectSpawned;
         }
 
-        private void OnDestroy()
+        public void Terminate()
         {
             _playerSpawner.OnSpawned -= HandlePlayerObjectSpawned;
         }

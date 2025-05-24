@@ -1,16 +1,12 @@
-using UnityEngine;
+using UiService.Code.Widgets;
 
 namespace Ui.MainMenu
 {
-    public class MainMenuScreen : ScreenBase
+    public class MainMenuScreen : BaseUiScreenWithStates<MainMenuScreenModel, MainMenuScreenView>
     {
-        [SerializeField] private MenuMainMenuScreenState _menuState;
-
-        protected override void InitInner()
+        protected override void RegisterStates()
         {
-            _menuState.SetOwner(this);
-            _menuState.gameObject.SetActive(false);
-            SwitchState(_menuState);
+            RegisterState<MenuMainMenuScreenState>(Model.MainMenuStateModel, View.MainMenuStateView, true);
         }
     }
 }

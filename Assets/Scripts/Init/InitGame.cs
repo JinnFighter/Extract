@@ -1,6 +1,7 @@
 using Common;
+using Cysharp.Threading.Tasks;
+using UiService;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 using VContainer;
 
 namespace Init
@@ -8,20 +9,45 @@ namespace Init
     public class InitGame : MonoBehaviour
     {
         [Inject] private LoadingService _loadingService;
+        [Inject] private NetworkService _networkService;
+        [Inject] private IUiService _uiService;
+        [Inject] private UserDataService _userDataService;
 
         private void Awake()
         {
+            Debug.Log("Preparing to init");
             DontDestroyOnLoad(this);
         }
 
-        private void Start()
+        private async void Start()
         {
-            _loadingService.Init();
+            Debug.Log("Init started");
+            await InitServices();
+            Debug.Log("Init complete");
+
             _loadingService.LoadScene("MainMenu");
         }
 
-        private void OnDestroy()
+        private async void OnApplicationQuit()
         {
+            Debug.Log("Quit Requested, Terminating everything");
+            await TerminateServices();
+            Debug.Log("Terminate complete");
+        }
+
+        private async UniTask InitServices()
+        {
+            _loadingService.Init();
+            _userDataService.Init();
+            _networkService.Init();
+            _uiService.Init();
+        }
+
+        private async UniTask TerminateServices()
+        {
+            _uiService.Terminate();
+            _networkService.Terminate();
+            _userDataService.Terminate();
             _loadingService.Terminate();
         }
     }
