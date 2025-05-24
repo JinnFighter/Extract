@@ -1,0 +1,18 @@
+{
+    "name": "UiService",
+    "rootNamespace": "",
+    "references": [
+        "GUID:190f94578202b0b4e8d5b61fbf16029f",
+        "GUID:f51ebe6a0ceec4240a699833d6309b23",
+        "GUID:a2ea179a74a43eb4698901213636dc72"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

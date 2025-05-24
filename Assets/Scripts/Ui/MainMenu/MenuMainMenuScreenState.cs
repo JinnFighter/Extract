@@ -1,71 +1,60 @@
 using Common;
 using FishNet;
 using FishNet.Object.Synchronizing;
-using TMPro;
-using UnityEngine;
+using UiService.Code.Widgets;
 using VContainer;
-using Button = UnityEngine.UI.Button;
 using Random = UnityEngine.Random;
 
 namespace Ui.MainMenu
 {
-    public class MenuMainMenuScreenState : ScreenState
+    public class MenuMainMenuScreenState : BaseUiScreenState<MainMenuScreenStateModel, MainMenuScreenStateView>
     {
-        [field: SerializeField] public Button ButtonHost { get; private set; }
-        [field: SerializeField] public Button ButtonJoin { get; private set; }
-        [field: SerializeField] public TMP_InputField TextFieldNickname { get; private set; }
-        [field: SerializeField] public TextMeshProUGUI TextConnectionInfo { get; private set; }
-        [Inject] private LoadingService _loadingService;
-        [Inject] private LobbyService _lobbyService;
-        [Inject] private UserDataService _userDataService;
-        [Inject] private NetworkService _networkService;
-
-        protected override void EnterStatInner()
+        protected override void InitInner()
         {
-            ButtonHost.onClick.AddListener(HandleButtonHostClicked);
-            ButtonJoin.onClick.AddListener(HandleButtonJoinClicked);
-            TextFieldNickname.text = _userDataService.LocalPlayer.Nickname;
-            TextFieldNickname.onEndEdit.AddListener(HandleTextFieldNicknameEndEdit);
-            _lobbyService.Players.OnChange += HandlePlayersChanged;
+            View.ButtonHost.onClick.AddListener(HandleButtonHostClicked);
+            View.ButtonJoin.onClick.AddListener(HandleButtonJoinClicked);
+            View.TextFieldNickname.text = Model.UserDataService.LocalPlayer.Nickname;
+            View.TextFieldNickname.onEndEdit.AddListener(HandleTextFieldNicknameEndEdit);
+            Model.LobbyService.Players.OnChange += HandlePlayersChanged;
         }
 
-        protected override void ExitStatInner()
+        protected override void TerminateInner()
         {
-            ButtonHost.onClick.RemoveListener(HandleButtonHostClicked);
-            ButtonJoin.onClick.RemoveListener(HandleButtonJoinClicked);
-            TextFieldNickname.onEndEdit.RemoveListener(HandleTextFieldNicknameEndEdit);
-            _lobbyService.Players.OnChange -= HandlePlayersChanged;
+            View.ButtonHost.onClick.RemoveListener(HandleButtonHostClicked);
+            View.ButtonJoin.onClick.RemoveListener(HandleButtonJoinClicked);
+            View.TextFieldNickname.onEndEdit.RemoveListener(HandleTextFieldNicknameEndEdit);
+            Model.LobbyService.Players.OnChange -= HandlePlayersChanged;
         }
 
         private void HandlePlayersChanged(SyncListOperation op, int index, PlayerData olditem, PlayerData newitem,
             bool asserver)
         {
             if (op != SyncListOperation.Add || index < 0) return;
-            if (_lobbyService.Players.Count > 1)
-                if (InstanceFinder.IsHostStarted && _lobbyService.Players.Count > 1)
-                    _loadingService.LoadScene("TestBattle", true);
+            if (Model.LobbyService.Players.Count > 1)
+                if (InstanceFinder.IsHostStarted && Model.LobbyService.Players.Count > 1)
+                    Model.LoadingService.LoadScene("TestBattle", true);
         }
 
         private void HandleTextFieldNicknameEndEdit(string arg0)
         {
-            _userDataService.LocalPlayer.SetNickname(arg0);
+            Model.UserDataService.LocalPlayer.SetNickname(arg0);
         }
 
         private async void HandleButtonHostClicked()
         {
-            ButtonHost.gameObject.SetActive(false);
-            ButtonJoin.gameObject.SetActive(false);
-            TextConnectionInfo.gameObject.SetActive(true);
-            await _networkService.Host();
-            await _networkService.Connect();
+            View.ButtonHost.gameObject.SetActive(false);
+            View.ButtonJoin.gameObject.SetActive(false);
+            View.TextConnectionInfo.gameObject.SetActive(true);
+            await Model.NetworkService.Host();
+            await Model.NetworkService.Connect();
         }
 
         private async void HandleButtonJoinClicked()
         {
-            ButtonHost.gameObject.SetActive(false);
-            ButtonJoin.gameObject.SetActive(false);
-            TextConnectionInfo.gameObject.SetActive(true);
-            await _networkService.Connect();
+            View.ButtonHost.gameObject.SetActive(false);
+            View.ButtonJoin.gameObject.SetActive(false);
+            View.TextConnectionInfo.gameObject.SetActive(true);
+            await Model.NetworkService.Connect();
         }
     }
 }
