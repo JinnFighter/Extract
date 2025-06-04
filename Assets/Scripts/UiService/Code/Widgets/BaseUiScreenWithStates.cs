@@ -32,6 +32,7 @@ namespace UiService.Code.Widgets
             where TState : IUiScreenState
         {
             StateRouter.RegisterState<TState>(stateModel, stateView);
+            stateView.gameObject.SetActive(false);
             if (isInitial) _initialStateType = typeof(TState);
         }
 
