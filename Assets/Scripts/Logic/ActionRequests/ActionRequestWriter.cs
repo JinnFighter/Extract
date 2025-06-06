@@ -1,12 +1,11 @@
 using System;
 using System.Collections.Generic;
 using FishNet.Serializing;
-using UnityEngine;
 
 namespace Logic.ActionRequests
 {
     //DO NOT REMOVE -> SERIALIZER IS USED BY FISH NET THROUGH REFLECTION
-    public static class ActionRequestWriter
+    public static class IActionRequestWriter
     {
         private static readonly Dictionary<Type, (Action<Writer, IActionRequest> writeAction,
             Action<Reader, IActionRequest>
@@ -15,9 +14,16 @@ namespace Logic.ActionRequests
             { typeof(ActionRequestEndTurn), (WriteEndTurnSpecificData, ReadEndTurnSpecificData) },
         };
 
-        public static void WriteActionRequest(this Writer writer, IActionRequest value)
+        public static void WriteIActionRequest(this Writer writer, IActionRequest value)
         {
-            writer.WriteString(value.GetType().ToString());
+            switch (value)
+            {
+                case ActionRequestEndTurn:
+                    writer.WriteUInt8Unpacked(1);
+                    break;
+                default:
+                    return;
+            }
 
             if (Actions.TryGetValue(value.GetType(), out var actions))
             {
@@ -25,13 +31,20 @@ namespace Logic.ActionRequests
             }
         }
 
-        public static IActionRequest ReadActionRequest(this Reader reader)
+        public static IActionRequest ReadIActionRequest(this Reader reader)
         {
-            var typeString = reader.ReadStringAllocated();
-            var type = Type.GetType(typeString);
-            var action = (IActionRequest)Activator.CreateInstance(type);
+            var typeByte = reader.ReadUInt8Unpacked();
+            IActionRequest action;
+            switch (typeByte)
+            {
+                case 1:
+                    action = reader.Read<ActionRequestEndTurn>();
+                    break;
+                default:
+                    return default;
+            }
 
-            if (Actions.TryGetValue(type, out var actions))
+            if (Actions.TryGetValue(action.GetType(), out var actions))
             {
                 actions.readAction.Invoke(reader, action);
             }

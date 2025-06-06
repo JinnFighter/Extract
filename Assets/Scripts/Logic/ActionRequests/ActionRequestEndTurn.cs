@@ -4,7 +4,7 @@ namespace Logic.ActionRequests
 {
     public struct ActionRequestEndTurn : IActionRequest
     {
-        public int CasterId { get; set; }
+        public int CasterId;
 
         public void AcceptEntity(EcsEntity entity)
         {

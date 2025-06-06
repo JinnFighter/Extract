@@ -6,6 +6,7 @@ namespace Logic.GameStateEvents
     {
         public int EventId { get; set; }
         public int TurnNumber { get; set; }
-        public int WinnerId { get; }
+        public EGameStateEventType EventType => EGameStateEventType.GameEnd;
+        public int WinnerId { get; set; }
     }
 }
