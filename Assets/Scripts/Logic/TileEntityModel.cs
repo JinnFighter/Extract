@@ -2,7 +2,7 @@
 
 namespace Logic
 {
-    public class TileEntityModel : ITileEntityModel
+    public class TileEntityModel : BaseEntityModel, ITileEntityModel
     {
         public Vector2Int Position { get; set; }
         public Vector3 WorldPosition { get; set; }

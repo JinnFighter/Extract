@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using Common;
 using FishNet.Transporting;
@@ -11,6 +10,7 @@ namespace Logic.GameStateEvents
         private readonly Dictionary<EGameStateEventType, IGameStateEventHandler> _eventHandlers = new()
         {
             { EGameStateEventType.PlayerTurn, new GameStateEventActivePlayerChangedHandler() },
+            { EGameStateEventType.FullEntity, new GameStateEventFullEntityHandler() },
             { EGameStateEventType.GameEnd, new GameStateEventGameEndedHandler() }
         };
 
@@ -19,8 +19,6 @@ namespace Logic.GameStateEvents
         public bool IsListening { get; private set; }
 
         public Queue<IGameStateEvent> GameEventQueue { get; } = new();
-
-        public event Action OnGameEventsReceived;
 
         public void Init(BattleInstance battleInstance, NetworkService networkService)
         {
@@ -37,6 +35,7 @@ namespace Logic.GameStateEvents
 
         private void SubscribeToGameStateEvents()
         {
+            _networkService.SubscribeClientBroadcast<GameStateEventFullEntity>(HandleGameStateEventFullEntity);
             _networkService.SubscribeClientBroadcast<GameStateEventGameStarted>(
                 HandleGameStateEventGameStartedReceived);
             _networkService.SubscribeClientBroadcast<GameStateEventActivePlayerChanged>(
@@ -44,15 +43,21 @@ namespace Logic.GameStateEvents
             _networkService.SubscribeClientBroadcast<GameStateEventGameEnded>(HandleGameStateEventGameEndedReceived);
             IsListening = true;
         }
-
+        
         private void UnsubscribeFromGameStateEvents()
         {
+            _networkService.UnsubscribeClientBroadcast<GameStateEventFullEntity>(HandleGameStateEventFullEntity);
             _networkService.UnsubscribeClientBroadcast<GameStateEventGameStarted>(
                 HandleGameStateEventGameStartedReceived);
             _networkService.UnsubscribeClientBroadcast<GameStateEventActivePlayerChanged>(
                 HandleGameStateEventPlayerChangedReceived);
             _networkService.UnsubscribeClientBroadcast<GameStateEventGameEnded>(HandleGameStateEventGameEndedReceived);
             IsListening = false;
+        }
+        
+        private void HandleGameStateEventFullEntity(GameStateEventFullEntity arg1, Channel arg2)
+        {
+            AddEventToQueue(arg1);
         }
 
         private void HandleGameStateEventGameStartedReceived(GameStateEventGameStarted arg1, Channel arg2)
@@ -76,7 +81,6 @@ namespace Logic.GameStateEvents
             GameEventQueue.Enqueue(gameEvent);
             if (_eventHandlers.TryGetValue(gameEvent.EventType, out var handler))
                 handler.HandleGameEvent(_battleInstance, gameEvent);
-            OnGameEventsReceived?.Invoke();
         }
     }
 }

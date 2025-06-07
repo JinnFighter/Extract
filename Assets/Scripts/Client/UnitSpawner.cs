@@ -1,6 +1,8 @@
 using System.Collections.Generic;
+using Client.Descriptions;
 using Logic;
 using UnityEngine;
+using VContainer;
 
 namespace Client
 {
@@ -8,9 +10,10 @@ namespace Client
     {
         [SerializeField] private BattleInstance _battleInstance;
         [SerializeField] private TileView _tileViewPrefab;
-        [SerializeField] private UnitView _unitViewPrefab;
         private readonly Dictionary<ITileEntityModel, TileView> _tileViews = new();
         private readonly Dictionary<IUnitEntityModel, UnitView> _unitViews = new();
+        [Inject]
+        private UnitViewLibrary _unitViewLibrary;
 
         public void Init()
         {
@@ -41,7 +44,7 @@ namespace Client
 
         public void SpawnUnit(IUnitEntityModel unit)
         {
-            var unitView = Instantiate(_unitViewPrefab, transform);
+            var unitView = Instantiate(_unitViewLibrary.Get(unit.NameId).View, transform);
             unitView.transform.position = unit.WorldPosition;
             unitView.Init(unit);
             _unitViews.Add(unit, unitView);

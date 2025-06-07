@@ -8,7 +8,7 @@ namespace Logic.Systems
     {
         private readonly EcsFilter<ComponentGame> _filter = null;
         private int _turnCount;
-        private readonly BattleInstance _battleInstance = null;
+        private readonly IGameEventSender _gameEventSender = null;
         public void Run()
         {
             if (_turnCount < 2)
@@ -20,7 +20,7 @@ namespace Logic.Systems
             ref var game = ref _filter.Get1(0);
             game.IsGameOver = true;
             game.WinnerId = game.CurrentPlayerId;
-            _battleInstance.SendGameEvent(new GameStateEventGameEnded
+            _gameEventSender.SendGameEvent(new GameStateEventGameEnded
             {
                 EventId = 1,
                 TurnNumber = 0,

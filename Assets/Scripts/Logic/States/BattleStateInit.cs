@@ -55,10 +55,6 @@ namespace Logic.States
 
         private void SetupGame(GameSetupInfo gameSetupInfo)
         {
-            foreach (var tileSetup in Owner.GameFieldSetup.TileSetups) Owner.BattleInstance.Model.AddTile(tileSetup);
-
-            foreach (var unitSetupInfo in gameSetupInfo.UnitsSetupInfo)
-                Owner.BattleInstance.Model.AddUnit(unitSetupInfo);
             Owner.BattleInstance.Model.SetCurrentPlayer(gameSetupInfo.StartingPlayerId);
 
             Owner.NetworkService.SendClientBroadcast(new BroadcastSetupComplete

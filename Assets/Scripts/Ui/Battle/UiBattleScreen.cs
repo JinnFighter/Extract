@@ -15,15 +15,15 @@ namespace Ui.Battle
 
         protected override void InitCommon()
         {
-            Model.BattleInstance.StateMachine.OnStateChanged += HandleStateChanged;
+            Model.BattleStateMachine.OnStateChanged += HandleStateChanged;
             View.ButtonEndTurn.onClick.AddListener(HandleButtonEndTurnClicked);
-            HandleStateChanged(Model.BattleInstance.StateMachine.CurrentState,
-                Model.BattleInstance.StateMachine.CurrentState);
+            HandleStateChanged(Model.BattleStateMachine.CurrentState,
+                Model.BattleStateMachine.CurrentState);
         }
 
         protected override void TerminateCommon()
         {
-            Model.BattleInstance.StateMachine.OnStateChanged -= HandleStateChanged;
+            Model.BattleStateMachine.OnStateChanged -= HandleStateChanged;
             View.ButtonEndTurn.onClick.RemoveListener(HandleButtonEndTurnClicked);
         }
 
@@ -47,7 +47,7 @@ namespace Ui.Battle
         
         private void HandleButtonEndTurnClicked()
         {
-            Model.BattleInstance.SendActionRequest(new ActionRequestEndTurn
+            Model.ActionRequestSender.SendActionRequest(new ActionRequestEndTurn
             {
                 CasterId = Model.UserDataService.LocalPlayer.Id
             });
