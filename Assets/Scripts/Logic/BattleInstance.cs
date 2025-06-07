@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using Common;
@@ -9,6 +8,7 @@ using FishNet.Object;
 using Leopotam.Ecs;
 using Logic.ActionRequests;
 using Logic.GameStateEvents;
+using Logic.States;
 using Logic.Systems;
 using UnityEngine;
 using VContainer;
@@ -19,45 +19,41 @@ namespace Logic
     public class BattleInstance : NetworkBehaviour
     {
         [SerializeField] private GameFieldSetup _gameFieldSetup;
+        public readonly GameStateEventListener GameStateEventListener = new();
+        private EcsSystems _ecsSystems;
+        private EcsWorld _ecsWorld;
         [Inject] private LobbyService _lobbyService;
         [Inject] private NetworkService _networkService;
         [Inject] private UserDataService _userDataService;
-        public Dictionary<Vector2Int, ITileEntityModel> TileEntityModels = new();
-        public Dictionary<int, IUnitEntityModel> UnitEntityModels = new();
-        public readonly GameStateEventListener GameStateEventListener = new();
-        private int _setupCount = 0;
-        private EcsWorld _ecsWorld;
-        private EcsSystems _ecsSystems;
-
-        public event Action<GameSetupInfo> OnGameSetup;
-        public event Action<int> OnGameStarted;
+        public BattleInstanceModel Model { get; } = new();
+        public BattleStateMachine StateMachine { get; private set; }
 
         public async void Init()
         {
-            _networkService.SubscribeClientBroadcast<GameSetupInfo>(HandleBroadcastGameSetupInfo);
-            _networkService.SubscribeClientBroadcast<GameStateEventGameStarted>(HandleGameStateEventGameStartedReceived);
-            GameStateEventListener.Init(_networkService);
+            StateMachine =
+                new BattleStateMachine(this, _gameFieldSetup, _userDataService, _lobbyService, _networkService);
+            StateMachine.Init();
+            _networkService.SubscribeClientBroadcast<GameStateEventGameStarted>(
+                HandleGameStateEventGameStartedReceived);
+            _networkService.SubscribeClientBroadcast<BroadcastBattleStateInit>(HandleBroadcastBattleStateInit);
+            GameStateEventListener.Init(this, _networkService);
             _userDataService.LocalPlayer.SetReady(true);
             await UniTask.WaitUntil(() => _lobbyService.Players.All(player => player.IsReady));
-            if (IsServerInitialized)
+            if (IsHostStarted)
             {
                 _networkService.SubscribeServerBroadcast<ActionRequestBroadcast>(HandleActionRequest);
-                _networkService.SubscribeServerBroadcast<BroadcastSetupComplete>(HandleBroadcastSetupCompleteReceived);
-                SetupGameServer();
+                _networkService.SendServerBroadcast(new BroadcastBattleStateInit());
             }
         }
-        
+
         public void Terminate()
         {
+            StateMachine?.Terminate();
             GameStateEventListener.Terminate();
-            _networkService.UnsubscribeClientBroadcast<GameSetupInfo>(HandleBroadcastGameSetupInfo);
-            _networkService.UnsubscribeClientBroadcast<GameStateEventGameStarted>(HandleGameStateEventGameStartedReceived);
+            _networkService.UnsubscribeClientBroadcast<GameStateEventGameStarted>(
+                HandleGameStateEventGameStartedReceived);
             _networkService.UnsubscribeServerBroadcast<ActionRequestBroadcast>(HandleActionRequest);
-            _networkService.UnsubscribeServerBroadcast<BroadcastSetupComplete>(HandleBroadcastSetupCompleteReceived);
-            UnitEntityModels?.Clear();
-            UnitEntityModels = null;
-            TileEntityModels?.Clear();
-            TileEntityModels = null;
+            _networkService.UnsubscribeClientBroadcast<BroadcastBattleStateInit>(HandleBroadcastBattleStateInit);
             _ecsSystems?.Destroy();
             _ecsSystems = null;
             _ecsWorld?.Destroy();
@@ -71,7 +67,12 @@ namespace Logic
                 ActionRequest = actionRequest
             });
         }
-        
+
+        private void HandleBroadcastBattleStateInit(BroadcastBattleStateInit arg1, Channel arg2)
+        {
+            StateMachine.ChangeState(arg1.Id);
+        }
+
         private void HandleActionRequest(NetworkConnection arg1, ActionRequestBroadcast arg2, Channel arg3)
         {
             var entity = _ecsWorld.NewEntity();
@@ -81,49 +82,24 @@ namespace Logic
 
         private void HandleGameStateEventGameStartedReceived(GameStateEventGameStarted arg1, Channel arg2)
         {
-            _networkService.UnsubscribeClientBroadcast<GameStateEventGameStarted>(HandleGameStateEventGameStartedReceived);
-            OnGameStarted?.Invoke(arg1.StartingPlayerId);
-        }
-
-        private void HandleBroadcastSetupCompleteReceived(NetworkConnection arg1, BroadcastSetupComplete arg2, Channel arg3)
-        {
-            _setupCount++;
-            if (_setupCount != _lobbyService.Players.Count)
-            {
-                return;
-            }
-            _networkService.UnsubscribeServerBroadcast<BroadcastSetupComplete>(HandleBroadcastSetupCompleteReceived);
-            SendGameEvent(new GameStateEventGameStarted
-            {
-                EventId = 0,
-                TurnNumber = 0,
-                StartingPlayerId = _userDataService.LocalPlayer.Id
-            });
-        }
-
-        private void HandleBroadcastGameSetupInfo(GameSetupInfo arg1, Channel arg2)
-        {
-            SetupGame(arg1);
-        }
-
-        public void SetupGame(GameSetupInfo gameSetupInfo)
-        {
-            TileEntityModels = SetupGameField();
-            UnitEntityModels = SetupUnits(gameSetupInfo);
-            OnGameSetup?.Invoke(gameSetupInfo);
-            _networkService.SendClientBroadcast(new BroadcastSetupComplete
-            {
-                UserId = OwnerId
-            });
+            StateMachine.ChangeState(Model.CurrentPlayerId == _userDataService.LocalPlayer.Id
+                ? EBattleStateId.PlayerTurn
+                : EBattleStateId.EnemyTurn);
         }
 
         public void SetupGameServer()
         {
+            var playersSetupInfo = new List<PlayerSetupInfo>();
             var unitsSetupInfo = new List<UnitSetupInfo>();
             var id = 0;
             var teamId = 0;
+            
             foreach (var player in _lobbyService.Players)
             {
+                playersSetupInfo.Add(new PlayerSetupInfo
+                {
+                    Id = player.Id
+                });
                 unitsSetupInfo.Add(new UnitSetupInfo
                 {
                     Id = id,
@@ -140,65 +116,45 @@ namespace Logic
 
             var setupInfo = new GameSetupInfo
             {
+                PlayersSetupInfo = playersSetupInfo,
                 UnitsSetupInfo = unitsSetupInfo,
+                StartingPlayerId = _userDataService.LocalPlayer.Id,
             };
 
             _ecsWorld = new EcsWorld();
+            var entity = _ecsWorld.NewEntity();
+            entity.Replace(setupInfo);
             _ecsSystems = new EcsSystems(_ecsWorld);
-                _ecsSystems
-                    .Inject(this)
-                    .Add(new EndTurnSystem())
-                    .OneFrame<ActionRequestEndTurn>()
-                    .Init();
-            
+            _ecsSystems
+                .Inject(this)
+                .Add(new InitGameSystem())
+                .Add(new CheckGameOverSystem())
+                .Add(new EndTurnSystem())
+                .OneFrame<GameSetupInfo>()
+                .OneFrame<ActionRequestEndTurn>()
+                .Init();
+
             _networkService.SendServerBroadcast(setupInfo);
-        }
-
-        private Dictionary<Vector2Int, ITileEntityModel> SetupGameField()
-        {
-            var dict = new Dictionary<Vector2Int, ITileEntityModel>();
-            foreach (var tileSetup in _gameFieldSetup.TileSetups)
-            {
-                var tileEntityModel = new TileEntityModel
-                {
-                    Position = tileSetup.TilePosition,
-                    IsWalkable = tileSetup.Walkable,
-                    WorldPosition = tileSetup.transform.position
-                };
-                dict[tileSetup.TilePosition] = tileEntityModel;
-            }
-
-            return dict;
-        }
-
-        private Dictionary<int, IUnitEntityModel> SetupUnits(GameSetupInfo gameSetupInfo)
-        {
-            var dict = new Dictionary<int, IUnitEntityModel>();
-            foreach (var unit in gameSetupInfo.UnitsSetupInfo)
-                dict[unit.Id] = new UnitEntityModel
-                {
-                    Id = unit.Id,
-                    OwnerId = unit.OwnerId,
-                    Position = new Vector2Int((int)unit.SpawnPosition.x, (int)unit.SpawnPosition.y),
-                    WorldPosition = unit.SpawnPosition
-                };
-            return dict;
         }
 
         public void SendGameEvent<T>(T gameStateEvent) where T : struct, IGameStateEvent, IBroadcast
         {
-            if (!IsServerInitialized)
-            {
-                return;
-            }
-            
+            if (!IsServerInitialized) return;
+
             _networkService.SendServerBroadcast(gameStateEvent);
         }
     }
 
     public struct GameSetupInfo : IBroadcast
     {
+        public List<PlayerSetupInfo> PlayersSetupInfo;
         public List<UnitSetupInfo> UnitsSetupInfo;
+        public int StartingPlayerId;
+    }
+
+    public struct PlayerSetupInfo
+    {
+        public int Id;
     }
 
     public struct UnitSetupInfo
@@ -213,5 +169,15 @@ namespace Logic
     public struct BroadcastSetupComplete : IBroadcast
     {
         public int UserId;
+    }
+
+    public interface IBroadcastBattleState
+    {
+        EBattleStateId Id { get; }
+    }
+
+    public struct BroadcastBattleStateInit : IBroadcastBattleState, IBroadcast
+    {
+        public EBattleStateId Id => EBattleStateId.Init;
     }
 }

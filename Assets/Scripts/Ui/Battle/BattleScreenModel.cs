@@ -14,9 +14,11 @@ namespace Ui.Battle
             ModelEnemy = modelEnemy;
             BattleInstance = battleInstance;
             UserDataService = userDataService;
+            GameOverModel = new BattleScreenStateGameOverModel(battleInstance);
         }
 
         public BattleScreenStateModelAlly ModelAlly { get; private set; }
         public BattleScreenStateModelEnemy ModelEnemy { get; private set; }
+        public BattleScreenStateGameOverModel GameOverModel { get; private set; }
     }
 }
