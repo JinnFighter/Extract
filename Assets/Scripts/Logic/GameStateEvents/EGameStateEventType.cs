@@ -5,6 +5,7 @@
         None,
         GameStart,
         PlayerTurn,
+        FullEntity,
         GameEnd,
     }
 }

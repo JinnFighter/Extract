@@ -2,7 +2,7 @@
 
 namespace Logic
 {
-    public interface ITileEntityModel : IEntityModel
+    public interface ITileEntityModel
     {
         Vector2Int Position { get; set; }
         Vector3 WorldPosition { get; set; }

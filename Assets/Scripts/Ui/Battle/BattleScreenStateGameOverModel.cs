@@ -5,11 +5,11 @@ namespace Ui.Battle
 {
     public class BattleScreenStateGameOverModel : IModel
     {
-        public BattleScreenStateGameOverModel(BattleInstance battleInstance)
+        public BattleScreenStateGameOverModel(BattleInstanceModel battleInstanceModel)
         {
-            BattleInstance = battleInstance;
+            BattleInstanceModel = battleInstanceModel;
         }
 
-        public BattleInstance BattleInstance { get; set; }
+        public BattleInstanceModel BattleInstanceModel { get; set; }
     }
 }

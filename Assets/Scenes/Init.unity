@@ -463,6 +463,8 @@ MonoBehaviour:
   _loadingService: {fileID: 147067858}
   _userDataService: {fileID: 1003122968}
   _uiService: {fileID: 1953643284}
+  _unitDescriptionLibrary: {fileID: 11400000, guid: b690b38097970a4448b583d686623437, type: 2}
+  _unitViewLibrary: {fileID: 11400000, guid: 2779d3dc829b8f4409e62c6518142c56, type: 2}
 --- !u!114 &2042204165
 MonoBehaviour:
   m_ObjectHideFlags: 0

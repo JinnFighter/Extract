@@ -8,7 +8,7 @@ namespace Logic.Systems
 {
     public class EndTurnSystem : IEcsRunSystem
     {
-        private readonly BattleInstance _battleInstance;
+        private readonly IGameEventSender _gameEventSender = null;
         private readonly EcsFilter<ActionRequestEndTurn> _filter = null;
         private readonly EcsFilter<ComponentGame> _filterGame = null;
 
@@ -34,7 +34,7 @@ namespace Logic.Systems
                     ? 0
                     : componentGame.CurrentPlayerIndex + 1;
                 Debug.Log($"Player {componentGame.CurrentPlayerId} is now active");
-                _battleInstance.SendGameEvent(new GameStateEventActivePlayerChanged
+                _gameEventSender.SendGameEvent(new GameStateEventActivePlayerChanged
                 {
                     EventId = 1,
                     TurnNumber = 0,

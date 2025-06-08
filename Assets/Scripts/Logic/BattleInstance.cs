@@ -5,28 +5,25 @@ using Cysharp.Threading.Tasks;
 using FishNet.Broadcast;
 using FishNet.Connection;
 using FishNet.Object;
-using Leopotam.Ecs;
 using Logic.ActionRequests;
 using Logic.GameStateEvents;
 using Logic.States;
-using Logic.Systems;
 using UnityEngine;
 using VContainer;
 using Channel = FishNet.Transporting.Channel;
 
 namespace Logic
 {
-    public class BattleInstance : NetworkBehaviour
+    public class BattleInstance : NetworkBehaviour, IGameEventSender, IActionRequestSender
     {
         [SerializeField] private GameFieldSetup _gameFieldSetup;
         public readonly GameStateEventListener GameStateEventListener = new();
-        private EcsSystems _ecsSystems;
-        private EcsWorld _ecsWorld;
         [Inject] private LobbyService _lobbyService;
         [Inject] private NetworkService _networkService;
         [Inject] private UserDataService _userDataService;
         public BattleInstanceModel Model { get; } = new();
         public BattleStateMachine StateMachine { get; private set; }
+        private readonly LogicRunner _logicRunner = new();
 
         public async void Init()
         {
@@ -54,10 +51,7 @@ namespace Logic
                 HandleGameStateEventGameStartedReceived);
             _networkService.UnsubscribeServerBroadcast<ActionRequestBroadcast>(HandleActionRequest);
             _networkService.UnsubscribeClientBroadcast<BroadcastBattleStateInit>(HandleBroadcastBattleStateInit);
-            _ecsSystems?.Destroy();
-            _ecsSystems = null;
-            _ecsWorld?.Destroy();
-            _ecsWorld = null;
+            _logicRunner.StopGameLogic();
         }
 
         public void SendActionRequest<T>(T actionRequest) where T : IActionRequest
@@ -75,9 +69,7 @@ namespace Logic
 
         private void HandleActionRequest(NetworkConnection arg1, ActionRequestBroadcast arg2, Channel arg3)
         {
-            var entity = _ecsWorld.NewEntity();
-            arg2.ActionRequest.AcceptEntity(entity);
-            _ecsSystems.Run();
+            _logicRunner.RunLogic(arg2);
         }
 
         private void HandleGameStateEventGameStartedReceived(GameStateEventGameStarted arg1, Channel arg2)
@@ -90,6 +82,7 @@ namespace Logic
         public void SetupGameServer()
         {
             var playersSetupInfo = new List<PlayerSetupInfo>();
+            var tilesSetupInfo = new List<TileSetupInfo>();
             var unitsSetupInfo = new List<UnitSetupInfo>();
             var id = 0;
             var teamId = 0;
@@ -114,26 +107,25 @@ namespace Logic
                 teamId++;
             }
 
+            foreach (var tileSetup in _gameFieldSetup.TileSetups)
+            {
+                var tileSetupInfo = new TileSetupInfo
+                {
+                    TilePosition = tileSetup.TilePosition,
+                    WorldPosition = tileSetup.transform.position
+                };
+                tilesSetupInfo.Add(tileSetupInfo);
+            }
+
             var setupInfo = new GameSetupInfo
             {
                 PlayersSetupInfo = playersSetupInfo,
                 UnitsSetupInfo = unitsSetupInfo,
+                TilesSetupInfo = tilesSetupInfo,
                 StartingPlayerId = _userDataService.LocalPlayer.Id,
             };
 
-            _ecsWorld = new EcsWorld();
-            var entity = _ecsWorld.NewEntity();
-            entity.Replace(setupInfo);
-            _ecsSystems = new EcsSystems(_ecsWorld);
-            _ecsSystems
-                .Inject(this)
-                .Add(new InitGameSystem())
-                .Add(new CheckGameOverSystem())
-                .Add(new EndTurnSystem())
-                .OneFrame<GameSetupInfo>()
-                .OneFrame<ActionRequestEndTurn>()
-                .Init();
-
+            _logicRunner.StartGameLogic(setupInfo, this);
             _networkService.SendServerBroadcast(setupInfo);
         }
 
@@ -148,6 +140,7 @@ namespace Logic
     public struct GameSetupInfo : IBroadcast
     {
         public List<PlayerSetupInfo> PlayersSetupInfo;
+        public List<TileSetupInfo> TilesSetupInfo;
         public List<UnitSetupInfo> UnitsSetupInfo;
         public int StartingPlayerId;
     }
@@ -155,6 +148,12 @@ namespace Logic
     public struct PlayerSetupInfo
     {
         public int Id;
+    }
+
+    public struct TileSetupInfo
+    {
+        public Vector2Int TilePosition;
+        public Vector3 WorldPosition;
     }
 
     public struct UnitSetupInfo

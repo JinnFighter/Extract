@@ -1,5 +1,7 @@
+using Client.Descriptions;
 using Common;
 using Cysharp.Threading.Tasks;
+using Logic.Descriptions;
 using UiService;
 using UnityEngine;
 using VContainer;
@@ -12,6 +14,8 @@ namespace Init
         [Inject] private NetworkService _networkService;
         [Inject] private IUiService _uiService;
         [Inject] private UserDataService _userDataService;
+        [Inject] private UnitDescriptionLibrary _unitDescriptionLibrary;
+        [Inject] private UnitViewLibrary _unitViewLibrary;
 
         private void Awake()
         {
@@ -41,10 +45,14 @@ namespace Init
             _userDataService.Init();
             _networkService.Init();
             _uiService.Init();
+            _unitDescriptionLibrary.Init();
+            _unitViewLibrary.Init();
         }
 
         private async UniTask TerminateServices()
         {
+            _unitDescriptionLibrary.Terminate();
+            _unitViewLibrary.Terminate();
             _uiService.Terminate();
             _networkService.Terminate();
             _userDataService.Terminate();

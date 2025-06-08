@@ -1,9 +1,12 @@
 using VContainer;
 using VContainer.Unity;
 
-public class TestBattleLifetimeScope : LifetimeScope
+namespace Init
 {
-    protected override void Configure(IContainerBuilder builder)
+    public class TestBattleLifetimeScope : LifetimeScope
     {
+        protected override void Configure(IContainerBuilder builder)
+        {
+        }
     }
 }

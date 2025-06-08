@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Logic.GameStateEvents;
 using UnityEngine;
 
 namespace Logic
@@ -10,6 +11,7 @@ namespace Logic
         private readonly Dictionary<int, IUnitEntityModel> _unitEntityModels = new();
         public IReadOnlyDictionary<Vector2Int, ITileEntityModel> TileEntityModels => _tileEntityModels;
         public IReadOnlyDictionary<int, IUnitEntityModel> UnitEntityModels => _unitEntityModels;
+        public Dictionary<int, IPlayerEntityModel> PlayerEntityModels { get; } = new();
         public event Action<ITileEntityModel> OnTileEntityAdded;
         public event Action<ITileEntityModel> OnTileEntityRemoved;
         public event Action<IUnitEntityModel> OnUnitEntityAdded;
@@ -18,14 +20,35 @@ namespace Logic
         public int CurrentPlayerId { get; private set; }
         public int WinnerId { get; private set; } = -1;
 
-        public void AddTile(TileSetup tileSetup)
+        public void AddPlayer(GameStateEventFullEntity entity)
+        {
+            if (entity.EntityType != EEntityType.Player)
+            {
+                return;
+            }
+
+            var model = new PlayerEntityModel();
+            foreach (var kvp in entity.Properties)
+            {
+                model.Set(kvp.Key, kvp.Value);
+            }
+            
+            PlayerEntityModels.Add(entity.Id, model);
+        }
+
+        public void AddTile(GameStateEventFullEntity entity)
         {
             var tileEntityModel = new TileEntityModel
             {
-                Position = tileSetup.TilePosition,
-                IsWalkable = tileSetup.Walkable,
-                WorldPosition = tileSetup.transform.position
+                Position = entity.TilePosition,
+                IsWalkable = true,
+                WorldPosition = entity.WorldPosition
             };
+
+            foreach (var kvp in entity.Properties)
+            {
+                tileEntityModel.Set(kvp.Key, kvp.Value);
+            }
 
             _tileEntityModels.Add(tileEntityModel.Position, tileEntityModel);
             OnTileEntityAdded?.Invoke(tileEntityModel);
@@ -38,15 +61,22 @@ namespace Logic
             OnTileEntityRemoved?.Invoke(tileEntityModel);
         }
 
-        public void AddUnit(UnitSetupInfo unitSetupInfo)
+        public void AddUnit(GameStateEventFullEntity entity)
         {
             var model = new UnitEntityModel
             {
-                Id = unitSetupInfo.Id,
-                OwnerId = unitSetupInfo.OwnerId,
-                Position = new Vector2Int((int)unitSetupInfo.SpawnPosition.x, (int)unitSetupInfo.SpawnPosition.y),
-                WorldPosition = unitSetupInfo.SpawnPosition
+                Id = entity.Id,
+                OwnerId = entity.OwnerId,
+                NameId = entity.NameId,
+                Position = entity.TilePosition,
+                WorldPosition = entity.WorldPosition
             };
+
+            foreach (var kvp in entity.Properties)
+            {
+                model.Set(kvp.Key, kvp.Value);
+            }
+            
             _unitEntityModels.Add(model.Id, model);
             OnUnitEntityAdded?.Invoke(model);
         }
