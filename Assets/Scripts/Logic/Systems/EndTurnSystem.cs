@@ -6,12 +6,21 @@ using UnityEngine;
 
 namespace Logic.Systems
 {
-    public class EndTurnSystem : IEcsRunSystem
+    public class EndTurnSystem : IEcsInitSystem, IEcsRunSystem
     {
-        private readonly IGameEventSender _gameEventSender = null;
+        private readonly GameEventLogger _gameEventLogger = null;
         private readonly EcsFilter<ActionRequestEndTurn> _filter = null;
         private readonly EcsFilter<ComponentGame> _filterGame = null;
 
+        public void Init()
+        {
+            ref var componentGame = ref _filterGame.Get1(0);
+            _gameEventLogger.LogGameEvent(new GameStateEventPlayerChanged
+            {
+                NewPlayerId = componentGame.CurrentPlayerId
+            });
+        }
+        
         public void Run()
         {
             foreach (var index in _filter)
@@ -34,10 +43,8 @@ namespace Logic.Systems
                     ? 0
                     : componentGame.CurrentPlayerIndex + 1;
                 Debug.Log($"Player {componentGame.CurrentPlayerId} is now active");
-                _gameEventSender.SendGameEvent(new GameStateEventActivePlayerChanged
+                _gameEventLogger.LogGameEvent(new GameStateEventPlayerChanged
                 {
-                    EventId = 1,
-                    TurnNumber = 0,
                     NewPlayerId = componentGame.CurrentPlayerId
                 });
             }

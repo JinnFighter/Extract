@@ -2,6 +2,6 @@
 {
     public interface IGameStateEventHandler
     {
-        void HandleGameEvent(BattleInstance instance, IGameStateEvent gameEvent);
+        void HandleGameEvent(BattleInstance instance, GameStateEvent gameEvent);
     }
 }

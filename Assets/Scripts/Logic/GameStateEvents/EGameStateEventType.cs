@@ -6,6 +6,8 @@
         GameStart,
         PlayerTurn,
         FullEntity,
+        SequenceStart,
+        SequenceEnd,
         GameEnd,
     }
 }

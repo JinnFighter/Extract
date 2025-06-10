@@ -17,42 +17,13 @@ namespace Logic
     public class BattleInstance : NetworkBehaviour, IGameEventSender, IActionRequestSender
     {
         [SerializeField] private GameFieldSetup _gameFieldSetup;
+        private readonly LogicRunner _logicRunner = new();
         public readonly GameStateEventListener GameStateEventListener = new();
         [Inject] private LobbyService _lobbyService;
         [Inject] private NetworkService _networkService;
         [Inject] private UserDataService _userDataService;
         public BattleInstanceModel Model { get; } = new();
         public BattleStateMachine StateMachine { get; private set; }
-        private readonly LogicRunner _logicRunner = new();
-
-        public async void Init()
-        {
-            StateMachine =
-                new BattleStateMachine(this, _gameFieldSetup, _userDataService, _lobbyService, _networkService);
-            StateMachine.Init();
-            _networkService.SubscribeClientBroadcast<GameStateEventGameStarted>(
-                HandleGameStateEventGameStartedReceived);
-            _networkService.SubscribeClientBroadcast<BroadcastBattleStateInit>(HandleBroadcastBattleStateInit);
-            GameStateEventListener.Init(this, _networkService);
-            _userDataService.LocalPlayer.SetReady(true);
-            await UniTask.WaitUntil(() => _lobbyService.Players.All(player => player.IsReady));
-            if (IsHostStarted)
-            {
-                _networkService.SubscribeServerBroadcast<ActionRequestBroadcast>(HandleActionRequest);
-                _networkService.SendServerBroadcast(new BroadcastBattleStateInit());
-            }
-        }
-
-        public void Terminate()
-        {
-            StateMachine?.Terminate();
-            GameStateEventListener.Terminate();
-            _networkService.UnsubscribeClientBroadcast<GameStateEventGameStarted>(
-                HandleGameStateEventGameStartedReceived);
-            _networkService.UnsubscribeServerBroadcast<ActionRequestBroadcast>(HandleActionRequest);
-            _networkService.UnsubscribeClientBroadcast<BroadcastBattleStateInit>(HandleBroadcastBattleStateInit);
-            _logicRunner.StopGameLogic();
-        }
 
         public void SendActionRequest<T>(T actionRequest) where T : IActionRequest
         {
@@ -62,9 +33,39 @@ namespace Logic
             });
         }
 
-        private void HandleBroadcastBattleStateInit(BroadcastBattleStateInit arg1, Channel arg2)
+        public void SendGameEvent(GameStateEvent gameStateEvent)
         {
-            StateMachine.ChangeState(arg1.Id);
+            if (!IsServerInitialized) return;
+
+            _networkService.SendServerBroadcast(new BroadcastGameStateEvent
+            {
+                GameStateEvent = gameStateEvent
+            });
+        }
+
+        public async void Init()
+        {
+            StateMachine =
+                new BattleStateMachine(this, _gameFieldSetup, _userDataService, _lobbyService, _networkService);
+            StateMachine.Init();
+            GameStateEventListener.Init(this);
+            _networkService.SubscribeClientBroadcast<BroadcastGameStateEvent>(HandleBroadcastGameStateEvent);
+            _userDataService.LocalPlayer.SetReady(true);
+            await UniTask.WaitUntil(() => _lobbyService.Players.All(player => player.IsReady));
+            if (IsHostStarted)
+            {
+                _networkService.SubscribeServerBroadcast<ActionRequestBroadcast>(HandleActionRequest);
+                SetupGameServer();
+            }
+        }
+
+        public void Terminate()
+        {
+            StateMachine?.Terminate();
+            GameStateEventListener.Terminate();
+            _networkService.UnsubscribeClientBroadcast<BroadcastGameStateEvent>(HandleBroadcastGameStateEvent);
+            _networkService.UnsubscribeServerBroadcast<ActionRequestBroadcast>(HandleActionRequest);
+            _logicRunner.StopGameLogic();
         }
 
         private void HandleActionRequest(NetworkConnection arg1, ActionRequestBroadcast arg2, Channel arg3)
@@ -72,21 +73,14 @@ namespace Logic
             _logicRunner.RunLogic(arg2);
         }
 
-        private void HandleGameStateEventGameStartedReceived(GameStateEventGameStarted arg1, Channel arg2)
-        {
-            StateMachine.ChangeState(Model.CurrentPlayerId == _userDataService.LocalPlayer.Id
-                ? EBattleStateId.PlayerTurn
-                : EBattleStateId.EnemyTurn);
-        }
-
-        public void SetupGameServer()
+        private void SetupGameServer()
         {
             var playersSetupInfo = new List<PlayerSetupInfo>();
             var tilesSetupInfo = new List<TileSetupInfo>();
             var unitsSetupInfo = new List<UnitSetupInfo>();
             var id = 0;
             var teamId = 0;
-            
+
             foreach (var player in _lobbyService.Players)
             {
                 playersSetupInfo.Add(new PlayerSetupInfo
@@ -121,28 +115,28 @@ namespace Logic
             {
                 PlayersSetupInfo = playersSetupInfo,
                 UnitsSetupInfo = unitsSetupInfo,
-                TilesSetupInfo = tilesSetupInfo,
-                StartingPlayerId = _userDataService.LocalPlayer.Id,
+                TilesSetupInfo = tilesSetupInfo
             };
 
             _logicRunner.StartGameLogic(setupInfo, this);
-            _networkService.SendServerBroadcast(setupInfo);
         }
 
-        public void SendGameEvent<T>(T gameStateEvent) where T : struct, IGameStateEvent, IBroadcast
+        private void HandleBroadcastGameStateEvent(BroadcastGameStateEvent arg1, Channel arg2)
         {
-            if (!IsServerInitialized) return;
-
-            _networkService.SendServerBroadcast(gameStateEvent);
+            GameStateEventListener.AddEventToQueue(arg1.GameStateEvent);
         }
     }
 
-    public struct GameSetupInfo : IBroadcast
+    internal struct BroadcastGameStateEvent : IBroadcast
+    {
+        public GameStateEvent GameStateEvent { get; set; }
+    }
+
+    public struct GameSetupInfo
     {
         public List<PlayerSetupInfo> PlayersSetupInfo;
         public List<TileSetupInfo> TilesSetupInfo;
         public List<UnitSetupInfo> UnitsSetupInfo;
-        public int StartingPlayerId;
     }
 
     public struct PlayerSetupInfo
@@ -163,20 +157,5 @@ namespace Logic
         public int OwnerId;
         public int TeamId;
         public Vector3 SpawnPosition;
-    }
-
-    public struct BroadcastSetupComplete : IBroadcast
-    {
-        public int UserId;
-    }
-
-    public interface IBroadcastBattleState
-    {
-        EBattleStateId Id { get; }
-    }
-
-    public struct BroadcastBattleStateInit : IBroadcastBattleState, IBroadcast
-    {
-        public EBattleStateId Id => EBattleStateId.Init;
     }
 }

@@ -1,12 +1,12 @@
-﻿using FishNet.Broadcast;
-
-namespace Logic.GameStateEvents
+﻿namespace Logic.GameStateEvents
 {
-    public struct GameStateEventGameEnded : IGameStateEvent, IBroadcast
+    public class GameStateEventGameEnded : GameStateEvent
     {
-        public int EventId { get; set; }
-        public int TurnNumber { get; set; }
-        public EGameStateEventType EventType => EGameStateEventType.GameEnd;
         public int WinnerId { get; set; }
+
+        public override EGameStateEventType GetEventType()
+        {
+            return EGameStateEventType.GameEnd;
+        }
     }
 }
