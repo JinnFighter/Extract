@@ -2,9 +2,6 @@
 {
     public class GameStateEventGameStarted : GameStateEvent
     {
-        public override EGameStateEventType GetEventType()
-        {
-            return EGameStateEventType.GameStart;
-        }
+        public override EGameStateEventType EventType => EGameStateEventType.GameStart;
     }
 }

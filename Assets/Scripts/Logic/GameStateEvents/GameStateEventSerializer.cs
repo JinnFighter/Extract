@@ -7,7 +7,7 @@ namespace Logic.GameStateEvents
     {
         public static void WriteGameStateEvent(this Writer writer, GameStateEvent gameStateEvent)
         {
-            writer.Write((int)gameStateEvent.GetEventType());
+            writer.Write((int)gameStateEvent.EventType);
             switch (gameStateEvent)
             {
                 case GameStateEventGameStarted gameStarted:

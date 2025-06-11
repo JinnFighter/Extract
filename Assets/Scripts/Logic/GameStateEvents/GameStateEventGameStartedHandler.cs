@@ -6,7 +6,7 @@ namespace Logic.GameStateEvents
     {
         public void HandleGameEvent(BattleInstance instance, GameStateEvent gameEvent)
         {
-            if (gameEvent.GetEventType() != EGameStateEventType.GameStart) return;
+            if (gameEvent.EventType != EGameStateEventType.GameStart) return;
             
             instance.StateMachine.ChangeState(EBattleStateId.Init);
         }

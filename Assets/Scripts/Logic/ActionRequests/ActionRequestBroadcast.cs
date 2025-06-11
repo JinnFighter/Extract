@@ -4,6 +4,6 @@ namespace Logic.ActionRequests
 {
     public struct ActionRequestBroadcast : IBroadcast
     {
-        public IActionRequest ActionRequest { get; set; }
+        public ActionRequest ActionRequest { get; set; }
     }
 }

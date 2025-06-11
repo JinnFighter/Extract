@@ -6,7 +6,7 @@ namespace Logic.GameStateEvents
 {
     public class GameStateEventFullEntity : GameStateEvent
     {
-        public override EGameStateEventType GetEventType() => EGameStateEventType.FullEntity;
+        public override EGameStateEventType EventType => EGameStateEventType.FullEntity;
 
         public EEntityType EntityType;
         public int Id;

@@ -1,8 +1,5 @@
 ﻿using System.Collections.Generic;
-using Common;
-using Leopotam.Ecs;
 using Logic.ActionRequests;
-using Logic.Descriptions;
 using Logic.GameStateEvents;
 using Logic.Systems;
 
@@ -10,61 +7,118 @@ namespace Logic
 {
     public class LogicRunner
     {
-        private EcsWorld _ecsWorld;
-        private EcsSystems _ecsSystems;
-        private bool _isRunning;
+        private bool _isStarted;
         private readonly GameEventLogger _logger = new();
         private IGameEventSender _gameEventSender;
+        private readonly LogicModel _logicModel = new();
+        private ILogicSystem _rootSystem;
+        public bool IsRunning => _rootSystem != null;
+
+        private readonly Dictionary<EActionRequestType, ILogicSystem> _requestSystems = new()
+        {
+            { EActionRequestType.EndTurn, new EndTurnSystem() },
+        };
+        private readonly List<IInitializeSystem> _initializeSystems = new()
+        {
+            new InitGameSystem(),
+            new EndTurnSystem()
+        };
+
+        private readonly List<ILogicSystem> _postRunSystems = new()
+        {
+            new CheckGameOverSystem(),
+        };
         
         public void StartGameLogic(GameSetupInfo gameSetupInfo, IGameEventSender gameEventSender)
         {
-            if (_isRunning)
+            if (_isStarted)
             {
                 return;
             }
             
             _gameEventSender = gameEventSender;
             
-            _isRunning = true;
+            _isStarted = true;
             _logger.OnEventsLogged += HandleEventsLogged;
-            
-            _ecsWorld = new EcsWorld();
-            var entity = _ecsWorld.NewEntity();
-            entity.Replace(gameSetupInfo);
-            _ecsSystems = new EcsSystems(_ecsWorld);
-            _ecsSystems
-                .Inject(gameEventSender)
-                .Inject(AutoResolver.Resolve<UnitDescriptionLibrary>())
-                .Inject(_logger)
-                .Add(new InitGameSystem())
-                .Add(new CheckGameOverSystem())
-                .Add(new EndTurnSystem())
-                .OneFrame<GameSetupInfo>()
-                .OneFrame<ActionRequestEndTurn>()
-                .Init();
+
+            foreach (var initSystem in _initializeSystems)
+            {
+                initSystem.Initialize(gameSetupInfo, _logicModel, _logger);
+            }
         }
         
         public void StopGameLogic()
         {
-            if (!_isRunning)
+            if (!_isStarted)
             {
                 return;
             }
-            _isRunning = false;
+            _isStarted = false;
             
             _logger.OnEventsLogged -= HandleEventsLogged;
-            
-            _ecsSystems?.Destroy();
-            _ecsSystems = null;
-            _ecsWorld?.Destroy();
-            _ecsWorld = null;
         }
 
-        public void RunLogic(ActionRequestBroadcast request)
+        public void RunLogic(ActionRequest request)
         {
-            var entity = _ecsWorld.NewEntity();
-            request.ActionRequest.AcceptEntity(entity);
-            _ecsSystems.Run();
+            if (IsRunning || _logicModel.GameEntity.IsGameOver)
+            {
+                return;
+            }
+            
+            _rootSystem = _requestSystems[request.ActionRequestType];
+
+            var sequence = CreateGameStateEventSequence(request, _logicModel, _rootSystem);
+
+            while (sequence.MoveNext())
+            {
+                var gameStateEvents = sequence.Current;
+                if (gameStateEvents == null)
+                {
+                    continue;
+                }
+                foreach (var gameStateEvent in gameStateEvents)
+                {
+                    _logger.LogGameEvent(gameStateEvent);
+                }
+            }
+            
+            foreach (var postRunSystem in _postRunSystems)
+            {
+                var postSequence = CreateGameStateEventSequence(request, _logicModel, postRunSystem);
+
+                while (postSequence.MoveNext())
+                {
+                    var gameStateEvents = postSequence.Current;
+                    if (gameStateEvents == null)
+                    {
+                        continue;
+                    }
+                    foreach (var gameStateEvent in gameStateEvents)
+                    {
+                        _logger.LogGameEvent(gameStateEvent);
+                    }
+                }
+            }
+
+            _rootSystem = null;
+        }
+
+        private IEnumerator<List<GameStateEvent>> CreateGameStateEventSequence(ActionRequest rootRequest, LogicModel logicModel, ILogicSystem logicSystem)
+        {
+            var sequence = RunSystemSequence(rootRequest, logicModel, logicSystem);
+            while (sequence.MoveNext())
+            {
+                yield return sequence.Current;
+            }
+        }
+
+        private IEnumerator<List<GameStateEvent>> RunSystemSequence(ActionRequest rootRequest, LogicModel logicModel, ILogicSystem logicSystem)
+        {
+            var logicRun = logicSystem.RunLogic(rootRequest, logicModel);
+            while (logicRun.MoveNext())
+            {
+                yield return logicRun.Current;
+            }
         }
         
         private void HandleEventsLogged(List<GameStateEvent> obj)

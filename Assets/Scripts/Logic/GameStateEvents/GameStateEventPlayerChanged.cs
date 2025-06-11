@@ -2,7 +2,7 @@
 {
     public class GameStateEventPlayerChanged : GameStateEvent
     {
-        public override EGameStateEventType GetEventType() => EGameStateEventType.PlayerTurn;
+        public override EGameStateEventType EventType => EGameStateEventType.PlayerTurn;
         public int NewPlayerId { get; set; }
     }
 }

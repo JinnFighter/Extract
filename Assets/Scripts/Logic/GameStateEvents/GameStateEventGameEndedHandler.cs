@@ -7,7 +7,7 @@ namespace Logic.GameStateEvents
     {
         public void HandleGameEvent(BattleInstance instance, GameStateEvent gameEvent)
         {
-            if (gameEvent.GetEventType() != EGameStateEventType.GameEnd) return;
+            if (gameEvent.EventType != EGameStateEventType.GameEnd) return;
 
             var id = (gameEvent as GameStateEventGameEnded).WinnerId;
             Debug.Log($"Game over event, winner is {id}");

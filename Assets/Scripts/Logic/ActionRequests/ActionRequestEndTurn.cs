@@ -1,14 +1,7 @@
-﻿using Leopotam.Ecs;
-
-namespace Logic.ActionRequests
+﻿namespace Logic.ActionRequests
 {
-    public struct ActionRequestEndTurn : IActionRequest
+    public class ActionRequestEndTurn : ActionRequest
     {
-        public int CasterId;
-
-        public void AcceptEntity(EcsEntity entity)
-        {
-            entity.Replace(this);
-        }
+        public override EActionRequestType ActionRequestType => EActionRequestType.EndTurn;
     }
 }

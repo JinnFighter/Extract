@@ -1,7 +1,4 @@
-using System;
 using System.Collections.Generic;
-using Leopotam.Ecs;
-using Logic.Components;
 using UnityEngine;
 
 namespace Logic.Descriptions
@@ -9,23 +6,8 @@ namespace Logic.Descriptions
     [CreateAssetMenu(fileName = "UnitDescriptionLibrary", menuName = "Scriptable Objects/UnitDescriptionLibrary")]
     public class UnitDescriptionLibrary : ScriptableObject
     {
-        private readonly Dictionary<string, UnitDescription> _descriptions = new Dictionary<string, UnitDescription>();
+        private readonly Dictionary<string, UnitDescription> _descriptions = new();
         [field: SerializeField] public List<UnitDescription> UnitDescriptions { get; set; }
-
-        private readonly Dictionary<EPropertyType, Func<EcsEntity, IPropertyComponent>> _propertySetters = new()
-        {
-            { EPropertyType.Health, entity =>
-            {
-                var comp = new ComponentHealth();
-                entity.Replace(comp);
-                return comp;
-            } }
-        };
-
-        public IPropertyComponent GetPropertyComponent(EPropertyType property, EcsEntity entity)
-        {
-            return _propertySetters[property].Invoke(entity);
-        }
 
         public void Init()
         {

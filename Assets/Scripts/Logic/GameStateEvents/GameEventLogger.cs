@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using UnityEngine;
 
 namespace Logic.GameStateEvents
 {
@@ -21,15 +22,16 @@ namespace Logic.GameStateEvents
             }
             gameStateEvent.EventId = EventNumber;
             gameStateEvent.TurnNumber = TurnNumber;
-            if (gameStateEvent.GetEventType() == EGameStateEventType.SequenceStart)
+            if (gameStateEvent.EventType == EGameStateEventType.SequenceStart)
             {
                 _sequenceStack.Push(gameStateEvent);
             }
-            else if (gameStateEvent.GetEventType() == EGameStateEventType.SequenceEnd)
+            else if (gameStateEvent.EventType == EGameStateEventType.SequenceEnd)
             {
                 _sequenceStack.Pop();
             }
             _lastLoggedEvents.Add(gameStateEvent);
+            Debug.Log($"Logged event: {gameStateEvent.EventType}");
 
             if (_sequenceStack.Count > 0)
             {

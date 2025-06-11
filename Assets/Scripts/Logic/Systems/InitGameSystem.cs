@@ -1,52 +1,63 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using Leopotam.Ecs;
+using Common;
 using Logic.Components;
 using Logic.Descriptions;
+using Logic.Entities;
 using Logic.GameStateEvents;
 using UnityEngine;
 
 namespace Logic.Systems
 {
-    public class InitGameSystem : IEcsInitSystem
+    public class InitGameSystem : IInitializeSystem
     {
-        private readonly UnitDescriptionLibrary _unitDescriptionLibrary = null;
-        private readonly EcsFilter<GameSetupInfo> _filterGame = null;
-        private readonly EcsWorld _world = null;
-        private readonly GameEventLogger _gameEventLogger = null;
-        public void Init()
+        public void Initialize(GameSetupInfo setupInfo, LogicModel logicModel, GameEventLogger gameEventLogger)
         {
-            _gameEventLogger.LogGameEvent(new GameStateEventGameStarted());
-            var setupInfo = _filterGame.Get1(0);
-            var gameEntity = _world.NewEntity();
-            ref var componentGame = ref gameEntity.Get<ComponentGame>();
-            componentGame.PlayerIds = new List<int>();
-            componentGame.CurrentPlayerIndex = 0;
+            GenerateGameAndPlayersEntities(setupInfo, logicModel, gameEventLogger);
+
+            GenerateTileEntities(setupInfo, logicModel, gameEventLogger);
+
+            GenerateUnitEntities(setupInfo, logicModel, gameEventLogger);
+        }
+
+        private void GenerateGameAndPlayersEntities(GameSetupInfo setupInfo, LogicModel logicModel, GameEventLogger gameEventLogger)
+        {
+            gameEventLogger.LogGameEvent(new GameStateEventGameStarted());
+            var gameEntity = logicModel.GameEntity;
+            gameEntity.PlayerIds.Clear();
+            gameEntity.CurrentPlayerIndex = 0;
             foreach (var playerSetupInfo in setupInfo.PlayersSetupInfo)
             {
-                var playerEntity = _world.NewEntity();
-                ref var componentPlayer = ref playerEntity.Get<ComponentPlayer>();
-                componentPlayer.Id = playerSetupInfo.Id;
-                componentGame.PlayerIds.Add(playerSetupInfo.Id);
+                var playerEntity = new PlayerEntity
+                {
+                    Id = playerSetupInfo.Id,
+                    OwnerId = playerSetupInfo.Id
+                };
+                gameEntity.PlayerIds.Add(playerSetupInfo.Id);
+                logicModel.PlayerEntities.Add(playerEntity.Id, playerEntity);
                 var playerProperties = new Dictionary<EPropertyType, int>();
 
                 var state = new GameStateEventFullEntity
                 {
                     EntityType = EEntityType.Player,
-                    EventId = 0,
                     Id = playerSetupInfo.Id,
                     OwnerId = playerSetupInfo.Id,
                     Properties = playerProperties
                 };
-                _gameEventLogger.LogGameEvent(state);
+                gameEventLogger.LogGameEvent(state);
             }
-            
+        }
+
+        private void GenerateTileEntities(GameSetupInfo setupInfo, LogicModel logicModel, GameEventLogger gameEventLogger)
+        {
             foreach (var tileSetupInfo in setupInfo.TilesSetupInfo)
             {
-                var tileEntity = _world.NewEntity();
-                ref var componentTile = ref tileEntity.Get<ComponentTile>();
-                componentTile.TilePosition = tileSetupInfo.TilePosition;
-                componentTile.WorldPosition = tileSetupInfo.WorldPosition;
+                var tileEntity = new TileEntity
+                {
+                    Position = tileSetupInfo.TilePosition,
+                    WorldPosition = tileSetupInfo.WorldPosition
+                };
+                logicModel.TileEntities.Add(tileEntity.Position, tileEntity);
                     
                 var propertyDict = new Dictionary<EPropertyType, int>();
                 var state = new GameStateEventFullEntity
@@ -56,38 +67,43 @@ namespace Logic.Systems
                     TilePosition = tileSetupInfo.TilePosition,
                     WorldPosition = tileSetupInfo.WorldPosition
                 };
-                _gameEventLogger.LogGameEvent(state);
+                gameEventLogger.LogGameEvent(state);
             }
+        }
 
+        private void GenerateUnitEntities(GameSetupInfo setupInfo, LogicModel logicModel, GameEventLogger gameEventLogger)
+        {
+            var unitDescriptionLibrary = AutoResolver.Resolve<UnitDescriptionLibrary>();
             foreach (var unitSetupInfo in setupInfo.UnitsSetupInfo)
             {
-                var unitDesc = _unitDescriptionLibrary.Get(unitSetupInfo.NameId);
-                var unitEntity = _world.NewEntity();
-                ref var componentUnit = ref unitEntity.Get<ComponentUnit>();
-                componentUnit.Id = unitSetupInfo.Id;
-                componentUnit.OwnerId = unitSetupInfo.OwnerId;
+                var unitDesc = unitDescriptionLibrary.Get(unitSetupInfo.NameId);
+                var unitEntity = new UnitEntity
+                {
+                    Id = unitSetupInfo.Id,
+                    OwnerId = unitSetupInfo.OwnerId,
+                    NameId = unitSetupInfo.NameId,
+                };
+                logicModel.UnitEntities.Add(unitSetupInfo.Id, unitEntity);
 
                 var propertyDict = new Dictionary<EPropertyType, int>();
                 foreach (var propertyDesc in unitDesc.Properties.Where(propDesc => propDesc.IsInitialTag))
                 {
-                    var component = _unitDescriptionLibrary.GetPropertyComponent(propertyDesc.PropertyType, unitEntity);
-                    component.Value = propertyDesc.DefaultValue;
-                    propertyDict.Add(propertyDesc.PropertyType, component.Value);
+                    propertyDict.Add(propertyDesc.PropertyType, propertyDesc.DefaultValue);
                 }
                 
                 var state = new GameStateEventFullEntity
                 {
                     EntityType = EEntityType.Unit,
-                    Id = componentUnit.Id,
-                    NameId = unitDesc.NameId,
-                    OwnerId = componentUnit.OwnerId,
+                    Id = unitEntity.Id,
+                    NameId = unitEntity.NameId,
+                    OwnerId = unitEntity.OwnerId,
                     Properties = propertyDict,
                     TilePosition = new Vector2Int((int)unitSetupInfo.SpawnPosition.x,
                         (int)unitSetupInfo.SpawnPosition.y),
                     WorldPosition = unitSetupInfo.SpawnPosition
                 };
                         
-                _gameEventLogger.LogGameEvent(state);
+                gameEventLogger.LogGameEvent(state);
             }
         }
     }

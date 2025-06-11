@@ -1,12 +1,8 @@
-﻿using Leopotam.Ecs;
-
-namespace Logic.ActionRequests
+﻿namespace Logic.ActionRequests
 {
-    public abstract class ActionRequest : IActionRequest
+    public abstract class ActionRequest
     {
-        public void AcceptEntity(EcsEntity entity)
-        {
-            
-        }
+        public int CasterId { get; set; }
+        public abstract EActionRequestType ActionRequestType { get; }
     }
 }
