@@ -64,6 +64,11 @@ namespace Logic
             {
                 return;
             }
+
+            if (!IsValidRequest(request))
+            {
+                return;
+            }
             
             _rootSystem = _requestSystems[request.ActionRequestType];
 
@@ -127,6 +132,11 @@ namespace Logic
             {
                 _gameEventSender.SendGameEvent(gameStateEvent);
             }
+        }
+
+        private bool IsValidRequest(ActionRequest actionRequest)
+        {
+            return !IsRunning && actionRequest.IsValid(_logicModel);
         }
     }
 }
