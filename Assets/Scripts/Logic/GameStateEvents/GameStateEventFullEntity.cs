@@ -1,15 +1,13 @@
 ﻿using System.Collections.Generic;
-using FishNet.Broadcast;
 using Logic.Components;
 using UnityEngine;
 
 namespace Logic.GameStateEvents
 {
-    public struct GameStateEventFullEntity : IGameStateEvent, IBroadcast
+    public class GameStateEventFullEntity : GameStateEvent
     {
-        public int EventId { get; set; }
-        public int TurnNumber { get; set; }
-        public EGameStateEventType EventType => EGameStateEventType.FullEntity;
+        public override EGameStateEventType GetEventType() => EGameStateEventType.FullEntity;
+
         public EEntityType EntityType;
         public int Id;
         public string NameId;

@@ -5,11 +5,11 @@ namespace Logic.GameStateEvents
 {
     public class GameStateEventGameEndedHandler : IGameStateEventHandler
     {
-        public void HandleGameEvent(BattleInstance instance, IGameStateEvent gameEvent)
+        public void HandleGameEvent(BattleInstance instance, GameStateEvent gameEvent)
         {
-            if (gameEvent.EventType != EGameStateEventType.GameEnd) return;
+            if (gameEvent.GetEventType() != EGameStateEventType.GameEnd) return;
 
-            var id = (gameEvent is GameStateEventGameEnded @event ? @event : default).WinnerId;
+            var id = (gameEvent as GameStateEventGameEnded).WinnerId;
             Debug.Log($"Game over event, winner is {id}");
             instance.Model.SetWinner(id);
             instance.StateMachine.ChangeState(EBattleStateId.GameOver);

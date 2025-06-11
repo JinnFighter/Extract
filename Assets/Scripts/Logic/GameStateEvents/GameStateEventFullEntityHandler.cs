@@ -4,14 +4,14 @@ namespace Logic.GameStateEvents
 {
     public class GameStateEventFullEntityHandler : IGameStateEventHandler
     {
-        public void HandleGameEvent(BattleInstance instance, IGameStateEvent gameEvent)
+        public void HandleGameEvent(BattleInstance instance, GameStateEvent gameEvent)
         {
-            if (gameEvent.EventType != EGameStateEventType.FullEntity)
+            if (gameEvent.GetEventType() != EGameStateEventType.FullEntity)
             {
                 return;
             }
 
-            var eventData = gameEvent is GameStateEventFullEntity @event ? @event : default;
+            var eventData = gameEvent as GameStateEventFullEntity;
             Debug.Log($"eventData: {eventData.EntityType}");
             switch (eventData.EntityType)
             {

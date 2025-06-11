@@ -1,7 +1,9 @@
-﻿using Common;
+﻿using System.Collections.Generic;
+using Common;
 using Leopotam.Ecs;
 using Logic.ActionRequests;
 using Logic.Descriptions;
+using Logic.GameStateEvents;
 using Logic.Systems;
 
 namespace Logic
@@ -11,6 +13,8 @@ namespace Logic
         private EcsWorld _ecsWorld;
         private EcsSystems _ecsSystems;
         private bool _isRunning;
+        private readonly GameEventLogger _logger = new();
+        private IGameEventSender _gameEventSender;
         
         public void StartGameLogic(GameSetupInfo gameSetupInfo, IGameEventSender gameEventSender)
         {
@@ -19,7 +23,11 @@ namespace Logic
                 return;
             }
             
+            _gameEventSender = gameEventSender;
+            
             _isRunning = true;
+            _logger.OnEventsLogged += HandleEventsLogged;
+            
             _ecsWorld = new EcsWorld();
             var entity = _ecsWorld.NewEntity();
             entity.Replace(gameSetupInfo);
@@ -27,6 +35,7 @@ namespace Logic
             _ecsSystems
                 .Inject(gameEventSender)
                 .Inject(AutoResolver.Resolve<UnitDescriptionLibrary>())
+                .Inject(_logger)
                 .Add(new InitGameSystem())
                 .Add(new CheckGameOverSystem())
                 .Add(new EndTurnSystem())
@@ -34,7 +43,7 @@ namespace Logic
                 .OneFrame<ActionRequestEndTurn>()
                 .Init();
         }
-
+        
         public void StopGameLogic()
         {
             if (!_isRunning)
@@ -42,6 +51,9 @@ namespace Logic
                 return;
             }
             _isRunning = false;
+            
+            _logger.OnEventsLogged -= HandleEventsLogged;
+            
             _ecsSystems?.Destroy();
             _ecsSystems = null;
             _ecsWorld?.Destroy();
@@ -53,6 +65,14 @@ namespace Logic
             var entity = _ecsWorld.NewEntity();
             request.ActionRequest.AcceptEntity(entity);
             _ecsSystems.Run();
+        }
+        
+        private void HandleEventsLogged(List<GameStateEvent> obj)
+        {
+            foreach (var gameStateEvent in obj)
+            {
+                _gameEventSender.SendGameEvent(gameStateEvent);
+            }
         }
     }
 }

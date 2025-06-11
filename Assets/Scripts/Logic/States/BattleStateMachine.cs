@@ -7,8 +7,6 @@ namespace Logic.States
 {
     public class BattleStateMachine
     {
-        private readonly Queue<EBattleStateId> _stateQueue = new();
-
         private readonly Dictionary<EBattleStateId, BattleState> _states = new()
         {
             { EBattleStateId.Init, new BattleStateInit() },
@@ -29,7 +27,6 @@ namespace Logic.States
 
         public BattleState CurrentState { get; private set; } = new NullBattleState();
         public bool IsInTransition { get; private set; }
-
         public BattleInstance BattleInstance { get; }
         public UserDataService UserDataService { get; }
         public LobbyService LobbyService { get; }
@@ -43,13 +40,11 @@ namespace Logic.States
             foreach (var kvp in _states)
             {
                 kvp.Value.Setup(this);
-                kvp.Value.OnComplete += HandleStateComplete;
             }
         }
 
         public void Terminate()
         {
-            foreach (var kvp in _states) kvp.Value.OnComplete -= HandleStateComplete;
             CurrentState.Exit();
             _states.Clear();
         }
@@ -59,7 +54,7 @@ namespace Logic.States
             Debug.Log($"Changing state to {eBattleStateId}");
             if (CurrentState.Id == eBattleStateId) return;
 
-            if (IsInTransition) _stateQueue.Enqueue(eBattleStateId);
+            if (IsInTransition) return;
 
             IsInTransition = true;
             var oldState = CurrentState;
@@ -69,14 +64,6 @@ namespace Logic.States
             var newState = CurrentState;
             IsInTransition = false;
             OnStateChanged?.Invoke(oldState, newState);
-        }
-
-        private void HandleStateComplete(EBattleStateId obj)
-        {
-            if (_stateQueue.Count == 0) return;
-
-            var nextState = _stateQueue.Dequeue();
-            ChangeState(nextState);
         }
     }
 }
