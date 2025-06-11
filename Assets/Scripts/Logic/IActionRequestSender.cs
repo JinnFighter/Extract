@@ -4,6 +4,6 @@ namespace Logic
 {
     public interface IActionRequestSender
     {
-        void SendActionRequest<T>(T actionRequest) where T : IActionRequest;
+        void SendActionRequest<T>(T actionRequest) where T : ActionRequest;
     }
 }

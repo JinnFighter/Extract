@@ -8,7 +8,7 @@ namespace Logic.GameStateEvents
     {
         public void HandleGameEvent(BattleInstance instance, GameStateEvent gameEvent)
         {
-            if (gameEvent.GetEventType() != EGameStateEventType.PlayerTurn) return;
+            if (gameEvent.EventType != EGameStateEventType.PlayerTurn) return;
 
             var gameEventPlayerChanged = gameEvent as GameStateEventPlayerChanged;
             var id = gameEventPlayerChanged.NewPlayerId;

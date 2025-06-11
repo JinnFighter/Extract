@@ -25,7 +25,7 @@ namespace Logic
         public BattleInstanceModel Model { get; } = new();
         public BattleStateMachine StateMachine { get; private set; }
 
-        public void SendActionRequest<T>(T actionRequest) where T : IActionRequest
+        public void SendActionRequest<T>(T actionRequest) where T : ActionRequest
         {
             _networkService.SendClientBroadcast(new ActionRequestBroadcast
             {
@@ -70,7 +70,8 @@ namespace Logic
 
         private void HandleActionRequest(NetworkConnection arg1, ActionRequestBroadcast arg2, Channel arg3)
         {
-            _logicRunner.RunLogic(arg2);
+            _logicRunner.RunLogic(arg2.ActionRequest);
+            
         }
 
         private void SetupGameServer()

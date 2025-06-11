@@ -15,7 +15,7 @@ namespace Logic.GameStateEvents
         private BattleInstance _battleInstance;
         public bool IsListening { get; private set; }
 
-        public Queue<IGameStateEvent> GameEventQueue { get; } = new();
+        public Queue<GameStateEvent> GameEventQueue { get; } = new();
 
         public void Init(BattleInstance battleInstance)
         {
@@ -31,7 +31,7 @@ namespace Logic.GameStateEvents
         public void AddEventToQueue(GameStateEvent gameEvent)
         {
             GameEventQueue.Enqueue(gameEvent);
-            if (_eventHandlers.TryGetValue(gameEvent.GetEventType(), out var handler))
+            if (_eventHandlers.TryGetValue(gameEvent.EventType, out var handler))
                 handler.HandleGameEvent(_battleInstance, gameEvent);
         }
 

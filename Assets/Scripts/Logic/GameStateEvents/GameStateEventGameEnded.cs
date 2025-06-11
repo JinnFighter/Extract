@@ -4,9 +4,6 @@
     {
         public int WinnerId { get; set; }
 
-        public override EGameStateEventType GetEventType()
-        {
-            return EGameStateEventType.GameEnd;
-        }
+        public override EGameStateEventType EventType => EGameStateEventType.GameEnd;
     }
 }
