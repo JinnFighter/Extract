@@ -15,6 +15,7 @@ namespace Init
 
         protected override void Configure(IContainerBuilder builder)
         {
+            builder.Register<EntitySelectorSystem>(Lifetime.Singleton).As<IEntitySelectorSystem>();
             builder.RegisterInstance(_battleInstance).As<BattleInstance>();
             builder.RegisterInstance(_battleInstanceClient).As<BattleInstanceClient>();
             builder.RegisterInstance(_replayService).As<ReplayService>();

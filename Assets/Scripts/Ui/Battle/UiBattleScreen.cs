@@ -25,6 +25,11 @@ namespace Ui.Battle
             Model.BattleStateMachine.OnStateChanged -= HandleStateChanged;
         }
 
+        protected override void RegisterChildWidgets()
+        {
+            RegisterChildWidget<WidgetSelectedUnit>(Model.ModelWidgetSelectedUnit, View.SelectedUnit);
+        }
+
         private void HandleStateChanged(BattleState oldState, BattleState newState)
         {
             switch (newState.Id)

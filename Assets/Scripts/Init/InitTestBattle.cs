@@ -19,6 +19,7 @@ namespace Init
         [Inject] private NetworkService _networkService;
         [Inject] private UserDataService _userDataService;
         [Inject] private IUiService _uiService;
+        [Inject] private IEntitySelectorSystem _entitySelectorSystem;
         [SerializeField] private ReplayService _replayService;
         private BattleScreenModel _battleScreenModel;
 
@@ -34,7 +35,10 @@ namespace Init
                     ActionRequestSender = _battleInstanceClient,
                     UserDataService = _userDataService
                 },
-                new BattleScreenStateModelEnemy(), _battleInstanceClient, _userDataService);
+                new BattleScreenStateModelEnemy(), _battleInstanceClient, _userDataService, new ModelWidgetSelectedUnit
+                {
+                    SelectorSystem = _entitySelectorSystem,
+                });
             _uiService.Open<UiBattleScreen>(_battleScreenModel, typeof(BattleScreenView));
         }
 
