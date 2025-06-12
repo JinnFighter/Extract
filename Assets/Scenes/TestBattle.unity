@@ -26785,6 +26785,7 @@ GameObject:
   - component: {fileID: 1183684040}
   - component: {fileID: 1183684039}
   - component: {fileID: 1183684042}
+  - component: {fileID: 1183684043}
   m_Layer: 0
   m_Name: BattleInstance
   m_TagString: Untagged
@@ -26891,6 +26892,19 @@ MonoBehaviour:
   _updateHostVisibility: 1
   _observerConditions:
   - {fileID: 11400000, guid: 2033f54fd2794464bae08fa5a55c8996, type: 2}
+--- !u!114 &1183684043
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1183684038}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d63a30dd50388f142866d275be6596df, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _gameFieldSetup: {fileID: 111411633}
 --- !u!1 &1185270991
 GameObject:
   m_ObjectHideFlags: 0
@@ -42436,6 +42450,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _gameFieldSetup: {fileID: 111411633}
   _battleInstance: {fileID: 1183684040}
+  _battleInstanceClient: {fileID: 1183684043}
   _unitSpawner: {fileID: 2042204165}
   _replayService: {fileID: 205679452}
 --- !u!114 &2042204164
@@ -42459,6 +42474,7 @@ MonoBehaviour:
   - {fileID: 1183684038}
   _replayService: {fileID: 205679452}
   _battleInstance: {fileID: 1183684040}
+  _battleInstanceClient: {fileID: 1183684043}
 --- !u!114 &2042204165
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -42471,7 +42487,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 803f4be29c30640409fe97404a70a640, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _battleInstance: {fileID: 1183684040}
+  _battleInstance: {fileID: 1183684043}
   _tileViewPrefab: {fileID: 8282602932803292642, guid: b7fb16e3699c74d459c75b86fea9452e, type: 3}
 --- !u!1 &2044075352
 GameObject:

@@ -2,6 +2,6 @@
 {
     public interface IOptionSystem
     {
-        void Run(LogicModel model, IGameEventSender gameEventSender);
+        void Run(LogicModelServer modelServer, IGameEventSender gameEventSender);
     }
 }

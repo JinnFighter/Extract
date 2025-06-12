@@ -8,7 +8,7 @@ namespace Ui.Battle
         protected override void InitInner()
         {
             var playerEntityModel =
-                Model.BattleInstanceModel.GetPlayerEntity(Model.BattleInstanceModel.CurrentPlayerId);
+                Model.LogicModelClient.GetPlayerEntity(Model.LogicModelClient.CurrentPlayerId);
             playerEntityModel.OnOptionAdded += HandleOptionAdded;
             playerEntityModel.OnOptionRemoved += HandleOptionRemoved;
             if (playerEntityModel.ActionRequestOptions.TryGetValue(EActionRequestType.EndTurn , out _))
@@ -25,7 +25,7 @@ namespace Ui.Battle
         {
             RemoveOption();
             var playerEntityModel =
-                Model.BattleInstanceModel.GetPlayerEntity(Model.BattleInstanceModel.CurrentPlayerId);
+                Model.LogicModelClient.GetPlayerEntity(Model.LogicModelClient.CurrentPlayerId);
             playerEntityModel.OnOptionAdded -= HandleOptionAdded;
             playerEntityModel.OnOptionRemoved -= HandleOptionRemoved;
         }
@@ -66,7 +66,7 @@ namespace Ui.Battle
         private void HandleButtonEndTurn()
         {
             var playerEntityModel =
-                Model.BattleInstanceModel.GetPlayerEntity(Model.BattleInstanceModel.CurrentPlayerId);
+                Model.LogicModelClient.GetPlayerEntity(Model.LogicModelClient.CurrentPlayerId);
             Model.ActionRequestSender.SendActionRequest(new ActionRequestEndTurn
             {
                 CasterId = playerEntityModel.Id

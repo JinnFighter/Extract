@@ -1,15 +1,15 @@
-﻿using Logic;
+﻿using Client;
 using MVVM;
 
 namespace Ui.Battle
 {
     public class BattleScreenStateGameOverModel : IModel
     {
-        public BattleScreenStateGameOverModel(BattleInstanceModel battleInstanceModel)
+        public BattleScreenStateGameOverModel(LogicModelClient logicModelClient)
         {
-            BattleInstanceModel = battleInstanceModel;
+            LogicModelClient = logicModelClient;
         }
 
-        public BattleInstanceModel BattleInstanceModel { get; set; }
+        public LogicModelClient LogicModelClient { get; set; }
     }
 }

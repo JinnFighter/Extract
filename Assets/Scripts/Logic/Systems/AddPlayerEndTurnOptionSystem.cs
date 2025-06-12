@@ -5,20 +5,20 @@ namespace Logic.Systems
 {
     public class AddPlayerEndTurnOptionSystem : IOptionSystem
     {
-        public void Run(LogicModel model, IGameEventSender gameEventSender)
+        public void Run(LogicModelServer modelServer, IGameEventSender gameEventSender)
         {
-            if (model.GameEntity.IsGameOver)
+            if (modelServer.GameEntityServer.IsGameOver)
             {
                 return;
             }
             var option = new ActionRequestOption
             {
-                EntityId = model.GameEntity.CurrentPlayerId,
+                EntityId = modelServer.GameEntityServer.CurrentPlayerId,
                 EntityType = EEntityType.Player,
                 IsAdd = true,
                 RequestType = EActionRequestType.EndTurn
             };
-            model.PlayerEntities[model.GameEntity.CurrentPlayerId].CurrentOptions.Add(EActionRequestType.EndTurn, option);
+            modelServer.PlayerEntities[modelServer.GameEntityServer.CurrentPlayerId].CurrentOptions.Add(EActionRequestType.EndTurn, option);
 
             gameEventSender.SendOption(option);
         }

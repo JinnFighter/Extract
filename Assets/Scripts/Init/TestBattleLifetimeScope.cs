@@ -1,3 +1,4 @@
+using Client;
 using Client.Replay;
 using Logic;
 using UnityEngine;
@@ -10,10 +11,12 @@ namespace Init
     {
         [SerializeField] private ReplayService _replayService;
         [SerializeField] private BattleInstance _battleInstance;
+        [SerializeField] private BattleInstanceClient _battleInstanceClient;
 
         protected override void Configure(IContainerBuilder builder)
         {
             builder.RegisterInstance(_battleInstance).As<BattleInstance>();
+            builder.RegisterInstance(_battleInstanceClient).As<BattleInstanceClient>();
             builder.RegisterInstance(_replayService).As<ReplayService>();
         }
     }

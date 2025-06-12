@@ -7,39 +7,27 @@ using FishNet.Connection;
 using FishNet.Object;
 using Logic.ActionRequests;
 using Logic.GameStateEvents;
-using Logic.States;
 using UnityEngine;
 using VContainer;
 using Channel = FishNet.Transporting.Channel;
 
 namespace Logic
 {
-    public class BattleInstance : NetworkBehaviour, IGameEventSender, IActionRequestSender
+    public class BattleInstance : NetworkBehaviour, IGameEventSender
     {
         [SerializeField] private GameFieldSetup _gameFieldSetup;
         private readonly LogicRunner _logicRunner = new();
-        public readonly GameStateEventListener GameStateEventListener = new();
         [Inject] private LobbyService _lobbyService;
         [Inject] private NetworkService _networkService;
         [Inject] private UserDataService _userDataService;
-        public BattleInstanceModel Model { get; } = new();
-        public BattleStateMachine StateMachine { get; private set; }
 
-        public void SendActionRequest<T>(T actionRequest) where T : ActionRequest
-        {
-            _networkService.SendClientBroadcast(new ActionRequestBroadcast
-            {
-                ActionRequest = actionRequest
-            });
-        }
-
-        public void SendGameEvent(GameStateEvent gameStateEvent)
+        public void SendGameEvent(ActionEvent actionEvent)
         {
             if (!IsServerInitialized) return;
 
-            _networkService.SendServerBroadcast(new BroadcastGameStateEvent
+            _networkService.SendServerBroadcast(new BroadcastActionEvent
             {
-                GameStateEvent = gameStateEvent
+                ActionEvent = actionEvent
             });
         }
 
@@ -55,11 +43,6 @@ namespace Logic
 
         public async void Init()
         {
-            StateMachine =
-                new BattleStateMachine(this, _gameFieldSetup, _userDataService, _lobbyService, _networkService);
-            StateMachine.Init();
-            GameStateEventListener.Init(this, _networkService);
-            _networkService.SubscribeClientBroadcast<BroadcastGameStateEvent>(HandleBroadcastGameStateEvent);
             _userDataService.LocalPlayer.SetReady(true);
             await UniTask.WaitUntil(() => _lobbyService.Players.All(player => player.IsReady));
             if (IsHostStarted)
@@ -71,9 +54,6 @@ namespace Logic
 
         public void Terminate()
         {
-            StateMachine?.Terminate();
-            GameStateEventListener.Terminate();
-            _networkService.UnsubscribeClientBroadcast<BroadcastGameStateEvent>(HandleBroadcastGameStateEvent);
             _networkService.UnsubscribeServerBroadcast<ActionRequestBroadcast>(HandleActionRequest);
             _logicRunner.StopGameLogic();
         }
@@ -81,7 +61,6 @@ namespace Logic
         private void HandleActionRequest(NetworkConnection arg1, ActionRequestBroadcast arg2, Channel arg3)
         {
             _logicRunner.RunLogic(arg2.ActionRequest);
-            
         }
 
         private void SetupGameServer()
@@ -131,16 +110,11 @@ namespace Logic
 
             _logicRunner.StartGameLogic(setupInfo, this);
         }
-
-        private void HandleBroadcastGameStateEvent(BroadcastGameStateEvent arg1, Channel arg2)
-        {
-            GameStateEventListener.AddEventToQueue(arg1.GameStateEvent);
-        }
     }
 
-    internal struct BroadcastGameStateEvent : IBroadcast
+    public struct BroadcastActionEvent : IBroadcast
     {
-        public GameStateEvent GameStateEvent { get; set; }
+        public ActionEvent ActionEvent { get; set; }
     }
 
     public struct GameSetupInfo

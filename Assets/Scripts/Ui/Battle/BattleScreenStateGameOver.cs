@@ -7,7 +7,7 @@ namespace Ui.Battle
     {
         protected override void InitInner()
         {
-            View.TextWinnerId.text = $"Game over! Winner is {Model.BattleInstanceModel.CurrentPlayerId}";
+            View.TextWinnerId.text = $"Game over! Winner is {Model.LogicModelClient.CurrentPlayerId}";
             View.ButtonQuitGame.onClick.AddListener(HandleButtonQuitGameClicked);
         }
 

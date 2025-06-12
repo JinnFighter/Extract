@@ -3,9 +3,9 @@
     public class ActionRequestEndTurn : ActionRequest
     {
         public override EActionRequestType ActionRequestType => EActionRequestType.EndTurn;
-        public override bool IsValid(LogicModel logicModel)
+        public override bool IsValid(LogicModelServer logicModelServer)
         {
-            return logicModel.GameEntity.CurrentPlayerId == CasterId;
+            return logicModelServer.GameEntityServer.CurrentPlayerId == CasterId;
         }
     }
 }

@@ -6,6 +6,6 @@ namespace Client.Replay
 {
     public interface IActionViewer
     {
-        IEnumerator<bool> Play(BattleInstance battleInstance, GameStateEvent gameStateEvent);
+        IEnumerator<bool> Play(BattleInstanceClient battleInstance, ActionEvent actionEvent);
     }
 }

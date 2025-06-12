@@ -6,33 +6,33 @@ namespace Logic.Systems
 {
     public class EndTurnSystem : BaseLogicSystem, IInitializeSystem
     {
-        protected override IEnumerator<GameStateEvent> RunLogicInner(ActionRequest rootRequest, LogicModel model)
+        protected override IEnumerator<ActionEvent> RunLogicInner(ActionRequest rootRequest, LogicModelServer modelServer)
         {
-            if (model.GameEntity.IsGameOver)
+            if (modelServer.GameEntityServer.IsGameOver)
             {
                 yield break;
             }
                 
-            if (model.GameEntity.CurrentPlayerId != rootRequest.CasterId)
+            if (modelServer.GameEntityServer.CurrentPlayerId != rootRequest.CasterId)
             {
                 yield break;
             }
                 
-            model.GameEntity.CurrentPlayerIndex = model.GameEntity.CurrentPlayerIndex + 1 >= model.GameEntity.PlayerIds.Count
+            modelServer.GameEntityServer.CurrentPlayerIndex = modelServer.GameEntityServer.CurrentPlayerIndex + 1 >= modelServer.GameEntityServer.PlayerIds.Count
                 ? 0
-                : model.GameEntity.CurrentPlayerIndex + 1;
-            yield return new GameStateEventPlayerChanged
+                : modelServer.GameEntityServer.CurrentPlayerIndex + 1;
+            yield return new ActionEventPlayerChanged
             {
-                NewPlayerId = model.GameEntity.CurrentPlayerId,
-                NetId = model.PlayerEntities[model.GameEntity.CurrentPlayerId].NetId
+                NewPlayerId = modelServer.GameEntityServer.CurrentPlayerId,
+                NetId = modelServer.PlayerEntities[modelServer.GameEntityServer.CurrentPlayerId].NetId
             };
         }
 
-        public void Initialize(GameSetupInfo gameSetupInfo, LogicModel logicModel, GameEventLogger gameEventLogger)
+        public void Initialize(GameSetupInfo gameSetupInfo, LogicModelServer logicModelServer, GameEventLogger gameEventLogger)
         {
-            gameEventLogger.LogGameEvent(new GameStateEventPlayerChanged
+            gameEventLogger.LogGameEvent(new ActionEventPlayerChanged
             {
-                NewPlayerId = logicModel.GameEntity.CurrentPlayerId
+                NewPlayerId = logicModelServer.GameEntityServer.CurrentPlayerId
             });
         }
     }

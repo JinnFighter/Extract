@@ -13,6 +13,7 @@ namespace Init
     {
         [SerializeField] private GameFieldSetup _gameFieldSetup;
         [SerializeField] private BattleInstance _battleInstance;
+        [SerializeField] private BattleInstanceClient _battleInstanceClient;
         [SerializeField] private UnitSpawner _unitSpawner;
         [Inject] private LobbyService _lobbyService;
         [Inject] private NetworkService _networkService;
@@ -26,13 +27,14 @@ namespace Init
             _unitSpawner.Init();
             _battleInstance.Init();
             _replayService.Init();
+            _battleInstanceClient.Init();
             _battleScreenModel = new BattleScreenModel(new BattleScreenStateModelAlly
                 {
-                    BattleInstanceModel = _battleInstance.Model,
-                    ActionRequestSender = _battleInstance,
+                    LogicModelClient = _battleInstanceClient.ModelClient,
+                    ActionRequestSender = _battleInstanceClient,
                     UserDataService = _userDataService
                 },
-                new BattleScreenStateModelEnemy(), _battleInstance, _userDataService);
+                new BattleScreenStateModelEnemy(), _battleInstanceClient, _userDataService);
             _uiService.Open<UiBattleScreen>(_battleScreenModel, typeof(BattleScreenView));
         }
 
@@ -41,6 +43,7 @@ namespace Init
             _uiService.Close(_battleScreenModel);
             _battleScreenModel = null;
             _replayService?.Terminate();
+            _battleInstanceClient?.Terminate();
             _battleInstance?.Terminate();
             _unitSpawner?.Terminate();
         }

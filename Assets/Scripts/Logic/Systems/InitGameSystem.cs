@@ -11,38 +11,38 @@ namespace Logic.Systems
 {
     public class InitGameSystem : IInitializeSystem
     {
-        public void Initialize(GameSetupInfo setupInfo, LogicModel logicModel, GameEventLogger gameEventLogger)
+        public void Initialize(GameSetupInfo setupInfo, LogicModelServer logicModelServer, GameEventLogger gameEventLogger)
         {
-            GenerateGameAndPlayersEntities(setupInfo, logicModel, gameEventLogger);
+            GenerateGameAndPlayersEntities(setupInfo, logicModelServer, gameEventLogger);
 
-            GenerateTileEntities(setupInfo, logicModel, gameEventLogger);
+            GenerateTileEntities(setupInfo, logicModelServer, gameEventLogger);
 
-            GenerateUnitEntities(setupInfo, logicModel, gameEventLogger);
+            GenerateUnitEntities(setupInfo, logicModelServer, gameEventLogger);
         }
 
-        private void GenerateGameAndPlayersEntities(GameSetupInfo setupInfo, LogicModel logicModel, GameEventLogger gameEventLogger)
+        private void GenerateGameAndPlayersEntities(GameSetupInfo setupInfo, LogicModelServer logicModelServer, GameEventLogger gameEventLogger)
         {
-            gameEventLogger.LogGameEvent(new GameStateEventGameStarted
+            gameEventLogger.LogGameEvent(new ActionEventGameStarted
             {
                 IsInitEvent = true
             });
-            var gameEntity = logicModel.GameEntity;
+            var gameEntity = logicModelServer.GameEntityServer;
             gameEntity.Id = 1;
             gameEntity.PlayerIds.Clear();
             gameEntity.CurrentPlayerIndex = 0;
             foreach (var playerSetupInfo in setupInfo.PlayersSetupInfo)
             {
-                var playerEntity = new PlayerEntity
+                var playerEntity = new PlayerEntityServer
                 {
                     Id = gameEntity.Id + gameEntity.PlayerIds.Count + 1,
                     OwnerId = gameEntity.Id + gameEntity.PlayerIds.Count + 1,
                     NetId = playerSetupInfo.Id
                 };
                 gameEntity.PlayerIds.Add(playerEntity.Id);
-                logicModel.PlayerEntities.Add(playerEntity.Id, playerEntity);
+                logicModelServer.PlayerEntities.Add(playerEntity.Id, playerEntity);
                 var playerProperties = new Dictionary<EPropertyType, int>();
 
-                var state = new GameStateEventFullEntity
+                var state = new ActionEventFullEntity
                 {
                     EntityType = EEntityType.Player,
                     Id = playerEntity.Id,
@@ -55,19 +55,19 @@ namespace Logic.Systems
             }
         }
 
-        private void GenerateTileEntities(GameSetupInfo setupInfo, LogicModel logicModel, GameEventLogger gameEventLogger)
+        private void GenerateTileEntities(GameSetupInfo setupInfo, LogicModelServer logicModelServer, GameEventLogger gameEventLogger)
         {
             foreach (var tileSetupInfo in setupInfo.TilesSetupInfo)
             {
-                var tileEntity = new TileEntity
+                var tileEntity = new TileEntityServer
                 {
                     Position = tileSetupInfo.TilePosition,
                     WorldPosition = tileSetupInfo.WorldPosition
                 };
-                logicModel.TileEntities.Add(tileEntity.Position, tileEntity);
+                logicModelServer.TileEntities.Add(tileEntity.Position, tileEntity);
                     
                 var propertyDict = new Dictionary<EPropertyType, int>();
-                var state = new GameStateEventFullEntity
+                var state = new ActionEventFullEntity
                 {
                     EntityType = EEntityType.Tile,
                     Properties = propertyDict,
@@ -79,19 +79,19 @@ namespace Logic.Systems
             }
         }
 
-        private void GenerateUnitEntities(GameSetupInfo setupInfo, LogicModel logicModel, GameEventLogger gameEventLogger)
+        private void GenerateUnitEntities(GameSetupInfo setupInfo, LogicModelServer logicModelServer, GameEventLogger gameEventLogger)
         {
             var unitDescriptionLibrary = AutoResolver.Resolve<UnitDescriptionLibrary>();
             foreach (var unitSetupInfo in setupInfo.UnitsSetupInfo)
             {
                 var unitDesc = unitDescriptionLibrary.Get(unitSetupInfo.NameId);
-                var unitEntity = new UnitEntity
+                var unitEntity = new UnitEntityServer
                 {
                     Id = unitSetupInfo.Id,
                     OwnerId = unitSetupInfo.OwnerId,
                     NameId = unitSetupInfo.NameId,
                 };
-                logicModel.UnitEntities.Add(unitSetupInfo.Id, unitEntity);
+                logicModelServer.UnitEntities.Add(unitSetupInfo.Id, unitEntity);
 
                 var propertyDict = new Dictionary<EPropertyType, int>();
                 foreach (var propertyDesc in unitDesc.Properties.Where(propDesc => propDesc.IsInitialTag))
@@ -99,7 +99,7 @@ namespace Logic.Systems
                     propertyDict.Add(propertyDesc.PropertyType, propertyDesc.DefaultValue);
                 }
                 
-                var state = new GameStateEventFullEntity
+                var state = new ActionEventFullEntity
                 {
                     EntityType = EEntityType.Unit,
                     Id = unitEntity.Id,

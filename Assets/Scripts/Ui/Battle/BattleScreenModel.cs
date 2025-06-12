@@ -1,5 +1,6 @@
-﻿using Common;
-using Logic;
+﻿using Client;
+using Client.States;
+using Common;
 using Logic.States;
 using MVVM;
 
@@ -9,13 +10,13 @@ namespace Ui.Battle
     {
         public BattleStateMachine BattleStateMachine { get; private set; }
         public UserDataService UserDataService { get; private set; }
-        public BattleScreenModel(BattleScreenStateModelAlly modelAlly, BattleScreenStateModelEnemy modelEnemy, BattleInstance battleInstance, UserDataService userDataService)
+        public BattleScreenModel(BattleScreenStateModelAlly modelAlly, BattleScreenStateModelEnemy modelEnemy, BattleInstanceClient battleInstance, UserDataService userDataService)
         {
             ModelAlly = modelAlly;
             ModelEnemy = modelEnemy;
             BattleStateMachine = battleInstance.StateMachine;
             UserDataService = userDataService;
-            GameOverModel = new BattleScreenStateGameOverModel(battleInstance.Model);
+            GameOverModel = new BattleScreenStateGameOverModel(battleInstance.ModelClient);
         }
 
         public BattleScreenStateModelAlly ModelAlly { get; private set; }

@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using Client.GameStateEvents;
 using Logic;
 using Logic.GameStateEvents;
 using UnityEngine;
@@ -8,21 +9,21 @@ namespace Client.Replay
     public class ActionReplay
     {
         public IActionViewer Viewer;
-        public GameStateEvent GameStateEvent;
-        public IGameStateEventHandler EventHandler;
-        public IEnumerator Play(BattleInstance battleInstance)
+        public ActionEvent ActionEvent;
+        public IActionEventHandler EventHandler;
+        public IEnumerator Play(BattleInstanceClient battleInstance)
         {
-            Debug.Log($"PLAYING {GameStateEvent.EventType}");
+            Debug.Log($"PLAYING {ActionEvent.EventType}");
             var isFrameReached = false;
             if (Viewer != null)
             {
-                var viewerSequence = Viewer.Play(battleInstance, GameStateEvent);
+                var viewerSequence = Viewer.Play(battleInstance, ActionEvent);
                 while (viewerSequence.MoveNext())
                 {
                     var isKeyFrameHit = viewerSequence.Current;
                     if (isKeyFrameHit)
                     {
-                        EventHandler.HandleGameEvent(battleInstance, GameStateEvent);
+                        EventHandler.HandleActionEvent(battleInstance, ActionEvent);
                         isFrameReached = true;
                     }
 
@@ -32,7 +33,7 @@ namespace Client.Replay
 
             if (!isFrameReached)
             {
-                EventHandler.HandleGameEvent(battleInstance, GameStateEvent);
+                EventHandler.HandleActionEvent(battleInstance, ActionEvent);
             }
         }
     }

@@ -8,36 +8,36 @@ namespace Logic.GameStateEvents
     {
         public int TurnNumber { get; private set; }
         public int EventNumber { get; private set; }
-        private readonly List<GameStateEvent> _lastLoggedEvents = new();
-        private readonly Stack<GameStateEvent> _sequenceStack = new();
+        private readonly List<ActionEvent> _lastLoggedEvents = new();
+        private readonly Stack<ActionEvent> _sequenceStack = new();
 
-        public event Action<List<GameStateEvent>> OnEventsLogged;
+        public event Action<List<ActionEvent>> OnEventsLogged;
 
-        public void LogGameEvent(GameStateEvent gameStateEvent)
+        public void LogGameEvent(ActionEvent actionEvent)
         {
             EventNumber++;
-            if (gameStateEvent is GameStateEventPlayerChanged)
+            if (actionEvent is ActionEventPlayerChanged)
             {
                 TurnNumber++;
             }
-            gameStateEvent.EventId = EventNumber;
-            gameStateEvent.TurnNumber = TurnNumber;
-            if (gameStateEvent.EventType == EGameStateEventType.SequenceStart)
+            actionEvent.EventId = EventNumber;
+            actionEvent.TurnNumber = TurnNumber;
+            if (actionEvent.EventType == EActionEventType.SequenceStart)
             {
-                _sequenceStack.Push(gameStateEvent);
+                _sequenceStack.Push(actionEvent);
             }
-            else if (gameStateEvent.EventType == EGameStateEventType.SequenceEnd)
+            else if (actionEvent.EventType == EActionEventType.SequenceEnd)
             {
                 _sequenceStack.Pop();
             }
-            _lastLoggedEvents.Add(gameStateEvent);
-            Debug.Log($"Logged event: {gameStateEvent.EventType}");
+            _lastLoggedEvents.Add(actionEvent);
+            Debug.Log($"Logged event: {actionEvent.EventType}");
 
             if (_sequenceStack.Count > 0)
             {
                 return;
             }
-            OnEventsLogged?.Invoke(new List<GameStateEvent>(_lastLoggedEvents));
+            OnEventsLogged?.Invoke(new List<ActionEvent>(_lastLoggedEvents));
             _lastLoggedEvents.Clear();
         }
     }

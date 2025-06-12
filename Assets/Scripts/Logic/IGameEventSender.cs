@@ -5,7 +5,7 @@ namespace Logic
 {
     public interface IGameEventSender
     {
-        void SendGameEvent(GameStateEvent gameStateEvent);
+        void SendGameEvent(ActionEvent actionEvent);
         void SendOption(ActionRequestOption option);
     }
 }
