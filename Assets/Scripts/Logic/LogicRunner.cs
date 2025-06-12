@@ -28,6 +28,16 @@ namespace Logic
         {
             new CheckGameOverSystem(),
         };
+
+        private readonly List<IOptionSystem> _preRunOptionSystems = new()
+        {
+            new RemovePlayerEndTurnOptionSystem(),
+        };
+        
+        private readonly List<IOptionSystem> _postRunOptionSystems = new()
+        {
+            new AddPlayerEndTurnOptionSystem()
+        };
         
         public void StartGameLogic(GameSetupInfo gameSetupInfo, IGameEventSender gameEventSender)
         {
@@ -44,6 +54,11 @@ namespace Logic
             foreach (var initSystem in _initializeSystems)
             {
                 initSystem.Initialize(gameSetupInfo, _logicModel, _logger);
+            }
+
+            foreach (var postRunOptionSystem in _postRunOptionSystems)
+            {
+                postRunOptionSystem.Run(_logicModel, _gameEventSender);
             }
         }
         
@@ -68,6 +83,11 @@ namespace Logic
             if (!IsValidRequest(request))
             {
                 return;
+            }
+
+            foreach (var preRunOptionSystem in _preRunOptionSystems)
+            {
+                preRunOptionSystem.Run(_logicModel, _gameEventSender);
             }
             
             _rootSystem = _requestSystems[request.ActionRequestType];
@@ -103,6 +123,11 @@ namespace Logic
                         _logger.LogGameEvent(gameStateEvent);
                     }
                 }
+            }
+            
+            foreach (var postRunOptionSystem in _postRunOptionSystems)
+            {
+                postRunOptionSystem.Run(_logicModel, _gameEventSender);
             }
 
             _rootSystem = null;

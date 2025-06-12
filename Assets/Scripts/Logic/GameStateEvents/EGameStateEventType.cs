@@ -10,9 +10,4 @@
         SequenceEnd,
         GameEnd,
     }
-
-    public enum ESequenceType
-    {
-        None,
-    }
 }

@@ -43,6 +43,16 @@ namespace Logic
             });
         }
 
+        public void SendOption(ActionRequestOption option)
+        {
+            if (!IsServerInitialized) return;
+
+            _networkService.SendServerBroadcast(new BroadcastOption
+            {
+                Option = option
+            });
+        }
+
         public async void Init()
         {
             StateMachine =

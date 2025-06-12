@@ -42,17 +42,17 @@ namespace Logic.GameStateEvents
 
         private void SubscribeToGameStateEvents()
         {
-            _networkService.SubscribeClientBroadcast<OptionBroadcast>(HandleOptionBroadcast);
+            _networkService.SubscribeClientBroadcast<BroadcastOption>(HandleOptionBroadcast);
             IsListening = true;
         }
 
         private void UnsubscribeFromGameStateEvents()
         {
-            _networkService.UnsubscribeClientBroadcast<OptionBroadcast>(HandleOptionBroadcast);
+            _networkService.UnsubscribeClientBroadcast<BroadcastOption>(HandleOptionBroadcast);
             IsListening = false;
         }
 
-        private void HandleOptionBroadcast(OptionBroadcast arg1, Channel arg2)
+        private void HandleOptionBroadcast(BroadcastOption arg1, Channel arg2)
         {
             switch (arg1.Option.EntityType)
             {

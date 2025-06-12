@@ -2,7 +2,7 @@
 
 namespace Logic.ActionRequests
 {
-    public struct OptionBroadcast : IBroadcast
+    public struct BroadcastOption : IBroadcast
     {
         public ActionRequestOption Option { get; set; }
     }
