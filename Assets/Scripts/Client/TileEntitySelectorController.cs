@@ -1,15 +1,15 @@
 ﻿using Common;
 using UnityEngine;
 
-namespace Client.Controllers
+namespace Client
 {
-    public class UnitEntitySelectorController : BaseUnitEntityController
+    public class TileEntitySelectorController : BaseTileEntityController
     {
-        private IUnitEntitySelectorSystem _unitEntitySelectorSystem;
+        private ITileEntitySelectorSystem _unitEntitySelectorSystem;
 
         protected override void InitInner()
         {
-            _unitEntitySelectorSystem = AutoResolver.Resolve<IUnitEntitySelectorSystem>();
+            _unitEntitySelectorSystem = AutoResolver.Resolve<ITileEntitySelectorSystem>();
             View.ClickableGameObject.OnObjectClicked.AddListener(HandleClickableGameObjectClicked);
         }
 
@@ -20,7 +20,7 @@ namespace Client.Controllers
 
         private void HandleClickableGameObjectClicked()
         {
-            Debug.Log($"Clicked on Unit id {Model.Id}");
+            Debug.Log($"Clicked on Tile Position {Model.Position}");
             _unitEntitySelectorSystem.Select(Model);
         }
     }
