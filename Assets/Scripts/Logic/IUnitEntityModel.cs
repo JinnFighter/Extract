@@ -1,3 +1,5 @@
+using System;
+using Logic.ActionRequests;
 using UnityEngine;
 
 namespace Logic
@@ -10,5 +12,10 @@ namespace Logic
         public Vector3 WorldPosition { get; set; }
         public int TeamId { get; set; }
         public string NameId { get; set; }
+        event Action<ActionRequestOption> OnOptionAdded;
+        event Action<ActionRequestOption> OnOptionRemoved;
+        void AddOption(ActionRequestOption option);
+
+        void RemoveOption(ActionRequestOption option);
     }
 }

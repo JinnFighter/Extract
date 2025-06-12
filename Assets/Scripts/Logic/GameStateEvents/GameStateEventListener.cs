@@ -1,4 +1,7 @@
 using System.Collections.Generic;
+using Common;
+using FishNet.Transporting;
+using Logic.ActionRequests;
 
 namespace Logic.GameStateEvents
 {
@@ -13,13 +16,15 @@ namespace Logic.GameStateEvents
         };
 
         private BattleInstance _battleInstance;
+        private NetworkService _networkService;
         public bool IsListening { get; private set; }
 
         public Queue<GameStateEvent> GameEventQueue { get; } = new();
 
-        public void Init(BattleInstance battleInstance)
+        public void Init(BattleInstance battleInstance, NetworkService networkService)
         {
             _battleInstance = battleInstance;
+            _networkService = networkService;
             SubscribeToGameStateEvents();
         }
 
@@ -37,12 +42,33 @@ namespace Logic.GameStateEvents
 
         private void SubscribeToGameStateEvents()
         {
+            _networkService.SubscribeClientBroadcast<OptionBroadcast>(HandleOptionBroadcast);
             IsListening = true;
         }
 
         private void UnsubscribeFromGameStateEvents()
         {
+            _networkService.UnsubscribeClientBroadcast<OptionBroadcast>(HandleOptionBroadcast);
             IsListening = false;
+        }
+
+        private void HandleOptionBroadcast(OptionBroadcast arg1, Channel arg2)
+        {
+            switch (arg1.Option.EntityType)
+            {
+                case EEntityType.Player:
+                    if (arg1.Option.IsAdd)
+                        _battleInstance.Model.PlayerEntityModels[arg1.Option.EntityId].AddOption(arg1.Option);
+                    else
+                        _battleInstance.Model.PlayerEntityModels[arg1.Option.EntityId].RemoveOption(arg1.Option);
+                    break;
+                case EEntityType.Unit:
+                    if (arg1.Option.IsAdd)
+                        _battleInstance.Model.UnitEntityModels[arg1.Option.EntityId].AddOption(arg1.Option);
+                    else
+                        _battleInstance.Model.UnitEntityModels[arg1.Option.EntityId].RemoveOption(arg1.Option);
+                    break;
+            }
         }
     }
 }

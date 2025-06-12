@@ -48,7 +48,7 @@ namespace Logic
             StateMachine =
                 new BattleStateMachine(this, _gameFieldSetup, _userDataService, _lobbyService, _networkService);
             StateMachine.Init();
-            GameStateEventListener.Init(this);
+            GameStateEventListener.Init(this, _networkService);
             _networkService.SubscribeClientBroadcast<BroadcastGameStateEvent>(HandleBroadcastGameStateEvent);
             _userDataService.LocalPlayer.SetReady(true);
             await UniTask.WaitUntil(() => _lobbyService.Players.All(player => player.IsReady));
