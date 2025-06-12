@@ -1,4 +1,6 @@
 using System.Collections.Generic;
+using System.Linq;
+using Client.Controllers;
 using Client.Descriptions;
 using UnityEngine;
 using VContainer;
@@ -10,7 +12,10 @@ namespace Client
         [SerializeField] private BattleInstanceClient _battleInstance;
         [SerializeField] private TileView _tileViewPrefab;
         private readonly Dictionary<ITileEntityClient, TileView> _tileViews = new();
-        private readonly Dictionary<IUnitEntityModelClient, UnitView> _unitViews = new();
+
+        private readonly Dictionary<IUnitEntityModelClient, (IUnitEntityController controller, UnitView view)>
+            _createdUnits = new();
+        
         [Inject]
         private UnitViewLibrary _unitViewLibrary;
 
@@ -22,9 +27,11 @@ namespace Client
 
         public void Terminate()
         {
-            foreach (var kvp in _unitViews) kvp.Value.Terminate();
-
-            _unitViews.Clear();
+            var createdUnits = _createdUnits.ToList();
+            foreach (var kvp in createdUnits)
+            {
+                DespawnUnit(kvp.Key);
+            }
 
             foreach (var kvp in _tileViews) kvp.Value.Terminate();
 
@@ -45,8 +52,20 @@ namespace Client
         {
             var unitView = Instantiate(_unitViewLibrary.Get(unit.NameId).View, transform);
             unitView.transform.position = unit.WorldPosition;
-            unitView.Init(unit);
-            _unitViews.Add(unit, unitView);
+            var controller = new UnitEntityController();
+            controller.Init(unit, unitView);
+            _createdUnits[unit] = (controller, unitView);
+        }
+
+        public void DespawnUnit(IUnitEntityModelClient unit)
+        {
+            if (!_createdUnits.Remove(unit, out var value))
+            {
+                return;
+            }
+            
+            value.controller.Terminate();
+            Destroy(value.view);
         }
 
         private void HandleUnitAdded(IUnitEntityModelClient obj)
