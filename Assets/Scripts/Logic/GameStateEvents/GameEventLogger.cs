@@ -37,7 +37,7 @@ namespace Logic.GameStateEvents
             {
                 return;
             }
-            OnEventsLogged?.Invoke(_lastLoggedEvents);
+            OnEventsLogged?.Invoke(new List<GameStateEvent>(_lastLoggedEvents));
             _lastLoggedEvents.Clear();
         }
     }

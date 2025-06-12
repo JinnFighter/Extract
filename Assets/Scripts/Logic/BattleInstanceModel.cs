@@ -11,7 +11,6 @@ namespace Logic
         private readonly Dictionary<int, IUnitEntityModel> _unitEntityModels = new();
         public IReadOnlyDictionary<Vector2Int, ITileEntityModel> TileEntityModels => _tileEntityModels;
         public IReadOnlyDictionary<int, IUnitEntityModel> UnitEntityModels => _unitEntityModels;
-        public Dictionary<int, IPlayerEntityModel> PlayerEntityModels { get; } = new();
         public event Action<ITileEntityModel> OnTileEntityAdded;
         public event Action<ITileEntityModel> OnTileEntityRemoved;
         public event Action<IUnitEntityModel> OnUnitEntityAdded;
@@ -20,23 +19,20 @@ namespace Logic
         public int CurrentPlayerId { get; private set; }
         public int WinnerId { get; private set; } = -1;
 
+        public IPlayerEntityModel Player1Entity { get; private set; } = new PlayerEntityModel();
+        public IPlayerEntityModel Player2Entity { get; private set; } = new PlayerEntityModel();
+
+        public IPlayerEntityModel GetPlayerEntity(int playerId) => playerId == 2 ? Player1Entity : Player2Entity;
+
         public void AddPlayer(GameStateEventFullEntity entity)
         {
-            if (entity.EntityType != EEntityType.Player)
-            {
-                return;
-            }
-
-            var model = new PlayerEntityModel
-            {
-                Id = entity.Id,
-            };
+            var model = GetPlayerEntity(entity.Id);
+            model.Id = entity.Id;
+            model.NetId = entity.NetId;
             foreach (var kvp in entity.Properties)
             {
                 model.Set(kvp.Key, kvp.Value);
             }
-            
-            PlayerEntityModels.Add(entity.Id, model);
         }
 
         public void AddTile(GameStateEventFullEntity entity)

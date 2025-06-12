@@ -23,7 +23,8 @@ namespace Logic.Systems
                 : model.GameEntity.CurrentPlayerIndex + 1;
             yield return new GameStateEventPlayerChanged
             {
-                NewPlayerId = model.GameEntity.CurrentPlayerId
+                NewPlayerId = model.GameEntity.CurrentPlayerId,
+                NetId = model.PlayerEntities[model.GameEntity.CurrentPlayerId].NetId
             };
         }
 

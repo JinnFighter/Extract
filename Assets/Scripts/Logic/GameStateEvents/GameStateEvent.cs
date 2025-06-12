@@ -5,5 +5,6 @@
         public int EventId { get; set; }
         public int TurnNumber { get; set; }
         public abstract EGameStateEventType EventType { get; }
+        public bool IsInitEvent { get; set; }
     }
 }

@@ -8,6 +8,7 @@ namespace Logic
     {
         public Dictionary<EActionRequestType, ActionRequestOption> ActionRequestOptions { get; } = new();
         public int Id { get; set; }
+        public int NetId { get; set; }
         public event Action<ActionRequestOption> OnOptionAdded;
         public event Action<ActionRequestOption> OnOptionRemoved;
 
