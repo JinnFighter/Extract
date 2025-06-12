@@ -4,6 +4,6 @@ namespace Logic.Systems
 {
     public interface IInitializeSystem
     {
-        void Initialize(GameSetupInfo gameSetupInfo, LogicModel logicModel, GameEventLogger gameEventLogger);
+        void Initialize(GameSetupInfo gameSetupInfo, LogicModelServer logicModelServer, GameEventLogger gameEventLogger);
     }
 }

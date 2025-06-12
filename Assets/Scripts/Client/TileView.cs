@@ -5,16 +5,16 @@ namespace Client
 {
     public class TileView : MonoBehaviour
     {
-        private ITileEntityModel _tileEntityModel;
+        private ITileEntityClient _tileEntityClient;
 
-        public void Init(ITileEntityModel tileEntityModel)
+        public void Init(ITileEntityClient tileEntityClient)
         {
-            _tileEntityModel = tileEntityModel;
+            _tileEntityClient = tileEntityClient;
         }
 
         public void Terminate()
         {
-            _tileEntityModel = null;
+            _tileEntityClient = null;
         }
     }
 }

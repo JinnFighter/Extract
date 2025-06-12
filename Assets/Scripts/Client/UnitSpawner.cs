@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using Client.Descriptions;
-using Logic;
 using UnityEngine;
 using VContainer;
 
@@ -8,17 +7,17 @@ namespace Client
 {
     public class UnitSpawner : MonoBehaviour
     {
-        [SerializeField] private BattleInstance _battleInstance;
+        [SerializeField] private BattleInstanceClient _battleInstance;
         [SerializeField] private TileView _tileViewPrefab;
-        private readonly Dictionary<ITileEntityModel, TileView> _tileViews = new();
-        private readonly Dictionary<IUnitEntityModel, UnitView> _unitViews = new();
+        private readonly Dictionary<ITileEntityClient, TileView> _tileViews = new();
+        private readonly Dictionary<IUnitEntityModelClient, UnitView> _unitViews = new();
         [Inject]
         private UnitViewLibrary _unitViewLibrary;
 
         public void Init()
         {
-            _battleInstance.Model.OnTileEntityAdded += HandleTileEntityAdded;
-            _battleInstance.Model.OnUnitEntityAdded += HandleUnitAdded;
+            _battleInstance.ModelClient.OnTileEntityAdded += HandleTileEntityAdded;
+            _battleInstance.ModelClient.OnUnitEntityAdded += HandleUnitAdded;
         }
 
         public void Terminate()
@@ -30,19 +29,19 @@ namespace Client
             foreach (var kvp in _tileViews) kvp.Value.Terminate();
 
             _tileViews.Clear();
-            _battleInstance.Model.OnTileEntityAdded -= HandleTileEntityAdded;
-            _battleInstance.Model.OnUnitEntityAdded -= HandleUnitAdded;
+            _battleInstance.ModelClient.OnTileEntityAdded -= HandleTileEntityAdded;
+            _battleInstance.ModelClient.OnUnitEntityAdded -= HandleUnitAdded;
         }
 
-        public void SpawnTile(ITileEntityModel tileEntityModel)
+        public void SpawnTile(ITileEntityClient tileEntityClient)
         {
             var tileView = Instantiate(_tileViewPrefab, transform);
-            tileView.transform.position = tileEntityModel.WorldPosition;
-            tileView.Init(tileEntityModel);
-            _tileViews.Add(tileEntityModel, tileView);
+            tileView.transform.position = tileEntityClient.WorldPosition;
+            tileView.Init(tileEntityClient);
+            _tileViews.Add(tileEntityClient, tileView);
         }
 
-        public void SpawnUnit(IUnitEntityModel unit)
+        public void SpawnUnit(IUnitEntityModelClient unit)
         {
             var unitView = Instantiate(_unitViewLibrary.Get(unit.NameId).View, transform);
             unitView.transform.position = unit.WorldPosition;
@@ -50,12 +49,12 @@ namespace Client
             _unitViews.Add(unit, unitView);
         }
 
-        private void HandleUnitAdded(IUnitEntityModel obj)
+        private void HandleUnitAdded(IUnitEntityModelClient obj)
         {
             SpawnUnit(obj);
         }
 
-        private void HandleTileEntityAdded(ITileEntityModel obj)
+        private void HandleTileEntityAdded(ITileEntityClient obj)
         {
             SpawnTile(obj);
         }

@@ -6,6 +6,6 @@ namespace Logic.Systems
 {
     public interface ILogicSystem
     {
-        IEnumerator<List<GameStateEvent>> RunLogic(ActionRequest rootRequest, LogicModel model);
+        IEnumerator<List<ActionEvent>> RunLogic(ActionRequest rootRequest, LogicModelServer modelServer);
     }
 }

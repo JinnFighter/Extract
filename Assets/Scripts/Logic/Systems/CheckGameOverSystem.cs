@@ -8,7 +8,7 @@ namespace Logic.Systems
     {
         private int _turnCount;
 
-        protected override IEnumerator<GameStateEvent> RunLogicInner(ActionRequest rootRequest, LogicModel model)
+        protected override IEnumerator<ActionEvent> RunLogicInner(ActionRequest rootRequest, LogicModelServer modelServer)
         {
             if (_turnCount < 2)
             {
@@ -16,11 +16,11 @@ namespace Logic.Systems
                 yield break;
             }
 
-            model.GameEntity.IsGameOver = true;
-            model.GameEntity.WinnerId = model.GameEntity.CurrentPlayerId;
-            yield return new GameStateEventGameEnded
+            modelServer.GameEntityServer.IsGameOver = true;
+            modelServer.GameEntityServer.WinnerId = modelServer.GameEntityServer.CurrentPlayerId;
+            yield return new ActionEventGameEnded
             {
-                WinnerId = model.GameEntity.WinnerId
+                WinnerId = modelServer.GameEntityServer.WinnerId
             };
         }
     }

@@ -1,6 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
-using Logic;
+using Client.GameStateEvents;
 using Logic.GameStateEvents;
 using UnityEngine;
 using VContainer;
@@ -9,31 +9,31 @@ namespace Client.Replay
 {
     public class ReplayService : MonoBehaviour
     {
-        private readonly Dictionary<EGameStateEventType, IGameStateEventHandler> _eventHandlers = new()
+        private readonly Dictionary<EActionEventType, IActionEventHandler> _eventHandlers = new()
         {
-            { EGameStateEventType.PlayerTurn, new GameStateEventActivePlayerChangedHandler() },
-            { EGameStateEventType.FullEntity, new GameStateEventFullEntityHandler() },
-            { EGameStateEventType.GameEnd, new GameStateEventGameEndedHandler() }
+            { EActionEventType.PlayerTurn, new ActionEventActivePlayerChangedHandler() },
+            { EActionEventType.FullEntity, new ActionEventFullEntityHandler() },
+            { EActionEventType.GameEnd, new ActionEventGameEndedHandler() }
         };
 
-        private readonly Dictionary<EGameStateEventType, IActionViewer> _eventViewers = new();
+        private readonly Dictionary<EActionEventType, IActionViewer> _eventViewers = new();
 
         private readonly Queue<List<ActionReplay>> _unplayedSequences = new();
-        [Inject] private BattleInstance _battleInstance;
+        [Inject] private BattleInstanceClient _battleInstance;
 
         private bool _isPlaying;
 
         public void Init()
         {
-            _battleInstance.GameStateEventListener.OnEventsLogged += HandleEventsLogged;
+            _battleInstance.ActionEventListener.OnEventsLogged += HandleEventsLogged;
         }
 
         public void Terminate()
         {
-            _battleInstance.GameStateEventListener.OnEventsLogged -= HandleEventsLogged;
+            _battleInstance.ActionEventListener.OnEventsLogged -= HandleEventsLogged;
         }
 
-        private void Replay(List<GameStateEvent> gameStateEvents)
+        private void Replay(List<ActionEvent> gameStateEvents)
         {
             var currentSequence = new List<ActionReplay>();
             foreach (var gameStateEvent in gameStateEvents)
@@ -47,31 +47,31 @@ namespace Client.Replay
             StartReplay(_battleInstance);
         }
 
-        private void HandleEventsLogged(List<GameStateEvent> obj)
+        private void HandleEventsLogged(List<ActionEvent> obj)
         {
             Replay(obj);
         }
 
-        private ActionReplay ParseEvent(GameStateEvent gameStateEvent)
+        private ActionReplay ParseEvent(ActionEvent actionEvent)
         {
-            _eventViewers.TryGetValue(gameStateEvent.EventType, out var viewer);
+            _eventViewers.TryGetValue(actionEvent.EventType, out var viewer);
             var replay = new ActionReplay
             {
-                GameStateEvent = gameStateEvent,
-                EventHandler = _eventHandlers[gameStateEvent.EventType],
+                ActionEvent = actionEvent,
+                EventHandler = _eventHandlers[actionEvent.EventType],
                 Viewer = viewer
             };
             return replay;
         }
 
-        private void StartReplay(BattleInstance battleInstance)
+        private void StartReplay(BattleInstanceClient battleInstance)
         {
             if (_isPlaying) return;
             
             StartCoroutine(ReplayInner(battleInstance));
         }
 
-        private IEnumerator ReplayInner(BattleInstance battleInstance)
+        private IEnumerator ReplayInner(BattleInstanceClient battleInstance)
         {
             _isPlaying = true;
             while (_unplayedSequences.Count > 0)

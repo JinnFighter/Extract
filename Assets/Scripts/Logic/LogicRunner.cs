@@ -10,7 +10,7 @@ namespace Logic
         private bool _isStarted;
         private readonly GameEventLogger _logger = new();
         private IGameEventSender _gameEventSender;
-        private readonly LogicModel _logicModel = new();
+        private readonly LogicModelServer _logicModelServer = new();
         private ILogicSystem _rootSystem;
         public bool IsRunning => _rootSystem != null;
 
@@ -53,12 +53,12 @@ namespace Logic
 
             foreach (var initSystem in _initializeSystems)
             {
-                initSystem.Initialize(gameSetupInfo, _logicModel, _logger);
+                initSystem.Initialize(gameSetupInfo, _logicModelServer, _logger);
             }
 
             foreach (var postRunOptionSystem in _postRunOptionSystems)
             {
-                postRunOptionSystem.Run(_logicModel, _gameEventSender);
+                postRunOptionSystem.Run(_logicModelServer, _gameEventSender);
             }
         }
         
@@ -75,7 +75,7 @@ namespace Logic
 
         public void RunLogic(ActionRequest request)
         {
-            if (IsRunning || _logicModel.GameEntity.IsGameOver)
+            if (IsRunning || _logicModelServer.GameEntityServer.IsGameOver)
             {
                 return;
             }
@@ -87,12 +87,12 @@ namespace Logic
 
             foreach (var preRunOptionSystem in _preRunOptionSystems)
             {
-                preRunOptionSystem.Run(_logicModel, _gameEventSender);
+                preRunOptionSystem.Run(_logicModelServer, _gameEventSender);
             }
             
             _rootSystem = _requestSystems[request.ActionRequestType];
 
-            var sequence = CreateGameStateEventSequence(request, _logicModel, _rootSystem);
+            var sequence = CreateGameStateEventSequence(request, _logicModelServer, _rootSystem);
 
             while (sequence.MoveNext())
             {
@@ -109,7 +109,7 @@ namespace Logic
             
             foreach (var postRunSystem in _postRunSystems)
             {
-                var postSequence = CreateGameStateEventSequence(request, _logicModel, postRunSystem);
+                var postSequence = CreateGameStateEventSequence(request, _logicModelServer, postRunSystem);
 
                 while (postSequence.MoveNext())
                 {
@@ -127,31 +127,31 @@ namespace Logic
             
             foreach (var postRunOptionSystem in _postRunOptionSystems)
             {
-                postRunOptionSystem.Run(_logicModel, _gameEventSender);
+                postRunOptionSystem.Run(_logicModelServer, _gameEventSender);
             }
 
             _rootSystem = null;
         }
 
-        private IEnumerator<List<GameStateEvent>> CreateGameStateEventSequence(ActionRequest rootRequest, LogicModel logicModel, ILogicSystem logicSystem)
+        private IEnumerator<List<ActionEvent>> CreateGameStateEventSequence(ActionRequest rootRequest, LogicModelServer logicModelServer, ILogicSystem logicSystem)
         {
-            var sequence = RunSystemSequence(rootRequest, logicModel, logicSystem);
+            var sequence = RunSystemSequence(rootRequest, logicModelServer, logicSystem);
             while (sequence.MoveNext())
             {
                 yield return sequence.Current;
             }
         }
 
-        private IEnumerator<List<GameStateEvent>> RunSystemSequence(ActionRequest rootRequest, LogicModel logicModel, ILogicSystem logicSystem)
+        private IEnumerator<List<ActionEvent>> RunSystemSequence(ActionRequest rootRequest, LogicModelServer logicModelServer, ILogicSystem logicSystem)
         {
-            var logicRun = logicSystem.RunLogic(rootRequest, logicModel);
+            var logicRun = logicSystem.RunLogic(rootRequest, logicModelServer);
             while (logicRun.MoveNext())
             {
                 yield return logicRun.Current;
             }
         }
         
-        private void HandleEventsLogged(List<GameStateEvent> obj)
+        private void HandleEventsLogged(List<ActionEvent> obj)
         {
             foreach (var gameStateEvent in obj)
             {
@@ -161,7 +161,7 @@ namespace Logic
 
         private bool IsValidRequest(ActionRequest actionRequest)
         {
-            return !IsRunning && actionRequest.IsValid(_logicModel);
+            return !IsRunning && actionRequest.IsValid(_logicModelServer);
         }
     }
 }

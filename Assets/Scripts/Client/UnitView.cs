@@ -5,16 +5,16 @@ namespace Client
 {
     public class UnitView : MonoBehaviour
     {
-        private IUnitEntityModel _unitEntityModel;
+        private IUnitEntityModelClient _unitEntityModelClient;
 
-        public void Init(IUnitEntityModel unitEntityModel)
+        public void Init(IUnitEntityModelClient unitEntityModelClient)
         {
-            _unitEntityModel = unitEntityModel;
+            _unitEntityModelClient = unitEntityModelClient;
         }
 
         public void Terminate()
         {
-            _unitEntityModel = null;
+            _unitEntityModelClient = null;
         }
     }
 }

@@ -2,6 +2,6 @@
 {
     public interface IPostRunSystem
     {
-        public void PostRun(LogicModel logicModel);
+        public void PostRun(LogicModelServer logicModelServer);
     }
 }

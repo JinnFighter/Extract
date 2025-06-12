@@ -6,11 +6,11 @@ namespace Logic.Systems
 {
     public abstract class BaseLogicSystem : ILogicSystem
     {
-        private readonly List<GameStateEvent> _collectedEvents = new();
-        public IEnumerator<List<GameStateEvent>> RunLogic(ActionRequest rootRequest, LogicModel model)
+        private readonly List<ActionEvent> _collectedEvents = new();
+        public IEnumerator<List<ActionEvent>> RunLogic(ActionRequest rootRequest, LogicModelServer modelServer)
         {
             _collectedEvents.Clear();
-            var innerLogic = RunLogicInner(rootRequest, model);
+            var innerLogic = RunLogicInner(rootRequest, modelServer);
             while (innerLogic.MoveNext())
             {
                 var gameStateEvent = innerLogic.Current;
@@ -24,6 +24,6 @@ namespace Logic.Systems
             yield return _collectedEvents;
         }
 
-        protected abstract IEnumerator<GameStateEvent> RunLogicInner(ActionRequest rootRequest, LogicModel model);
+        protected abstract IEnumerator<ActionEvent> RunLogicInner(ActionRequest rootRequest, LogicModelServer modelServer);
     }
 }
