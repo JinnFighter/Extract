@@ -2,12 +2,12 @@
 
 namespace Client
 {
-    public class EntitySelectorSystem : IEntitySelectorSystem
+    public class UnitEntitySelectorSystem : IUnitEntitySelectorSystem
     {
         public IUnitEntityModelClient SelectedUnit { get; private set; }
         public event Action<IUnitEntityModelClient> OnUnitEntitySelected;
         public event Action<IUnitEntityModelClient> OnUnitEntityDeselected;
-        public void SelectUnit(IUnitEntityModelClient unitEntityModelClient)
+        public void Select(IUnitEntityModelClient unitEntityModelClient)
         {
             if (unitEntityModelClient == SelectedUnit)
             {
@@ -21,7 +21,6 @@ namespace Client
                 {
                     DeselectUnitInner(selectedUnit);
                 }
-                
             }
         }
 

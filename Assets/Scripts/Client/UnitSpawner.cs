@@ -11,7 +11,7 @@ namespace Client
     {
         [SerializeField] private BattleInstanceClient _battleInstance;
         [SerializeField] private TileView _tileViewPrefab;
-        private readonly Dictionary<ITileEntityClient, TileView> _tileViews = new();
+        private readonly Dictionary<ITileEntityClient, (ITileEntityController controller, TileView view)> _createdTiles = new();
 
         private readonly Dictionary<IUnitEntityModelClient, (IUnitEntityController controller, UnitView view)>
             _createdUnits = new();
@@ -32,10 +32,16 @@ namespace Client
             {
                 DespawnUnit(kvp.Key);
             }
+            
+            _createdUnits.Clear();
 
-            foreach (var kvp in _tileViews) kvp.Value.Terminate();
-
-            _tileViews.Clear();
+            var createdTiles = _createdTiles.ToList();
+            foreach (var kvp in createdTiles)
+            {
+                DespawnTile(kvp.Key);
+            }
+            _createdTiles.Clear();
+            
             _battleInstance.ModelClient.OnTileEntityAdded -= HandleTileEntityAdded;
             _battleInstance.ModelClient.OnUnitEntityAdded -= HandleUnitAdded;
         }
@@ -45,7 +51,20 @@ namespace Client
             var tileView = Instantiate(_tileViewPrefab, transform);
             tileView.transform.position = tileEntityClient.WorldPosition;
             tileView.Init(tileEntityClient);
-            _tileViews.Add(tileEntityClient, tileView);
+            var controller = new TileEntityController();
+            controller.Init(tileEntityClient, tileView);
+            _createdTiles[tileEntityClient] = (controller,tileView);
+        }
+
+        public void DespawnTile(ITileEntityClient tileEntityClient)
+        {
+            if (!_createdTiles.Remove(tileEntityClient, out var value))
+            {
+                return;
+            }
+            
+            value.controller.Terminate();
+            Destroy(value.view.gameObject);
         }
 
         public void SpawnUnit(IUnitEntityModelClient unit)
@@ -65,7 +84,7 @@ namespace Client
             }
             
             value.controller.Terminate();
-            Destroy(value.view);
+            Destroy(value.view.gameObject);
         }
 
         private void HandleUnitAdded(IUnitEntityModelClient obj)

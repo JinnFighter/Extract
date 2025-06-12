@@ -2,11 +2,11 @@
 
 namespace Client
 {
-    public interface IEntitySelectorSystem
+    public interface IUnitEntitySelectorSystem
     {
         IUnitEntityModelClient SelectedUnit { get; }
         event Action<IUnitEntityModelClient> OnUnitEntitySelected;
         event Action<IUnitEntityModelClient> OnUnitEntityDeselected;
-        public void SelectUnit(IUnitEntityModelClient unitEntityModelClient);
+        public void Select(IUnitEntityModelClient unitEntityModelClient);
     }
 }
