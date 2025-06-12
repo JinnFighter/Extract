@@ -7,6 +7,7 @@ namespace Logic
     public class PlayerEntityModel : BaseEntityModel, IPlayerEntityModel
     {
         public Dictionary<EActionRequestType, ActionRequestOption> ActionRequestOptions { get; } = new();
+        public int Id { get; set; }
         public event Action<ActionRequestOption> OnOptionAdded;
         public event Action<ActionRequestOption> OnOptionRemoved;
 

@@ -27,7 +27,10 @@ namespace Logic
                 return;
             }
 
-            var model = new PlayerEntityModel();
+            var model = new PlayerEntityModel
+            {
+                Id = entity.Id,
+            };
             foreach (var kvp in entity.Properties)
             {
                 model.Set(kvp.Key, kvp.Value);

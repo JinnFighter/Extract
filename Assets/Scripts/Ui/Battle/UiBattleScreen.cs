@@ -1,4 +1,3 @@
-using Logic.ActionRequests;
 using Logic.States;
 using UiService.Code.Widgets;
 
@@ -16,7 +15,6 @@ namespace Ui.Battle
         protected override void InitCommon()
         {
             Model.BattleStateMachine.OnStateChanged += HandleStateChanged;
-            View.ButtonEndTurn.onClick.AddListener(HandleButtonEndTurnClicked);
             HandleStateChanged(Model.BattleStateMachine.CurrentState,
                 Model.BattleStateMachine.CurrentState);
         }
@@ -24,7 +22,6 @@ namespace Ui.Battle
         protected override void TerminateCommon()
         {
             Model.BattleStateMachine.OnStateChanged -= HandleStateChanged;
-            View.ButtonEndTurn.onClick.RemoveListener(HandleButtonEndTurnClicked);
         }
 
         private void HandleStateChanged(BattleState oldState, BattleState newState)
@@ -43,14 +40,6 @@ namespace Ui.Battle
                 default:
                     return;
             }
-        }
-        
-        private void HandleButtonEndTurnClicked()
-        {
-            Model.ActionRequestSender.SendActionRequest(new ActionRequestEndTurn
-            {
-                CasterId = Model.UserDataService.LocalPlayer.Id
-            });
         }
     }
 }
