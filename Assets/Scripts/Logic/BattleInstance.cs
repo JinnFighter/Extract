@@ -43,12 +43,22 @@ namespace Logic
             });
         }
 
+        public void SendOption(ActionRequestOption option)
+        {
+            if (!IsServerInitialized) return;
+
+            _networkService.SendServerBroadcast(new BroadcastOption
+            {
+                Option = option
+            });
+        }
+
         public async void Init()
         {
             StateMachine =
                 new BattleStateMachine(this, _gameFieldSetup, _userDataService, _lobbyService, _networkService);
             StateMachine.Init();
-            GameStateEventListener.Init(this);
+            GameStateEventListener.Init(this, _networkService);
             _networkService.SubscribeClientBroadcast<BroadcastGameStateEvent>(HandleBroadcastGameStateEvent);
             _userDataService.LocalPlayer.SetReady(true);
             await UniTask.WaitUntil(() => _lobbyService.Players.All(player => player.IsReady));

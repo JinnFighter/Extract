@@ -5,6 +5,5 @@
         public int CasterId { get; set; }
         public abstract EActionRequestType ActionRequestType { get; }
         public abstract bool IsValid(LogicModel logicModel);
-
     }
 }

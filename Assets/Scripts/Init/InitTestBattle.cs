@@ -23,7 +23,12 @@ namespace Init
         {
             _unitSpawner.Init();
             _battleInstance.Init();
-            _battleScreenModel = new BattleScreenModel(new BattleScreenStateModelAlly(),
+            _battleScreenModel = new BattleScreenModel(new BattleScreenStateModelAlly
+                {
+                    BattleInstanceModel = _battleInstance.Model,
+                    ActionRequestSender = _battleInstance,
+                    UserDataService = _userDataService
+                },
                 new BattleScreenStateModelEnemy(), _battleInstance, _userDataService);
             _uiService.Open<UiBattleScreen>(_battleScreenModel, typeof(BattleScreenView));
         }
