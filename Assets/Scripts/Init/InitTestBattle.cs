@@ -1,4 +1,5 @@
 using Client;
+using Client.Replay;
 using Common;
 using Logic;
 using Ui.Battle;
@@ -17,12 +18,14 @@ namespace Init
         [Inject] private NetworkService _networkService;
         [Inject] private UserDataService _userDataService;
         [Inject] private IUiService _uiService;
+        [SerializeField] private ReplayService _replayService;
         private BattleScreenModel _battleScreenModel;
 
         private void Start()
         {
             _unitSpawner.Init();
             _battleInstance.Init();
+            _replayService.Init();
             _battleScreenModel = new BattleScreenModel(new BattleScreenStateModelAlly
                 {
                     BattleInstanceModel = _battleInstance.Model,
@@ -37,6 +40,7 @@ namespace Init
         {
             _uiService.Close(_battleScreenModel);
             _battleScreenModel = null;
+            _replayService?.Terminate();
             _battleInstance?.Terminate();
             _unitSpawner?.Terminate();
         }

@@ -16,11 +16,6 @@ namespace Logic.GameStateEvents
             switch (eventData.EntityType)
             {
                 case EEntityType.Player:
-                    if (instance.Model.PlayerEntityModels.TryGetValue(eventData.Id, out _))
-                    {
-                        return;
-                    }
-                    
                     instance.Model.AddPlayer(eventData);
                     break;
                 case EEntityType.Unit:

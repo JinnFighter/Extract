@@ -22,27 +22,34 @@ namespace Logic.Systems
 
         private void GenerateGameAndPlayersEntities(GameSetupInfo setupInfo, LogicModel logicModel, GameEventLogger gameEventLogger)
         {
-            gameEventLogger.LogGameEvent(new GameStateEventGameStarted());
+            gameEventLogger.LogGameEvent(new GameStateEventGameStarted
+            {
+                IsInitEvent = true
+            });
             var gameEntity = logicModel.GameEntity;
+            gameEntity.Id = 1;
             gameEntity.PlayerIds.Clear();
             gameEntity.CurrentPlayerIndex = 0;
             foreach (var playerSetupInfo in setupInfo.PlayersSetupInfo)
             {
                 var playerEntity = new PlayerEntity
                 {
-                    Id = playerSetupInfo.Id,
-                    OwnerId = playerSetupInfo.Id
+                    Id = gameEntity.Id + gameEntity.PlayerIds.Count + 1,
+                    OwnerId = gameEntity.Id + gameEntity.PlayerIds.Count + 1,
+                    NetId = playerSetupInfo.Id
                 };
-                gameEntity.PlayerIds.Add(playerSetupInfo.Id);
+                gameEntity.PlayerIds.Add(playerEntity.Id);
                 logicModel.PlayerEntities.Add(playerEntity.Id, playerEntity);
                 var playerProperties = new Dictionary<EPropertyType, int>();
 
                 var state = new GameStateEventFullEntity
                 {
                     EntityType = EEntityType.Player,
-                    Id = playerSetupInfo.Id,
-                    OwnerId = playerSetupInfo.Id,
-                    Properties = playerProperties
+                    Id = playerEntity.Id,
+                    NetId = playerEntity.NetId,
+                    OwnerId = playerEntity.OwnerId,
+                    Properties = playerProperties,
+                    IsInitEvent = true
                 };
                 gameEventLogger.LogGameEvent(state);
             }
@@ -65,7 +72,8 @@ namespace Logic.Systems
                     EntityType = EEntityType.Tile,
                     Properties = propertyDict,
                     TilePosition = tileSetupInfo.TilePosition,
-                    WorldPosition = tileSetupInfo.WorldPosition
+                    WorldPosition = tileSetupInfo.WorldPosition,
+                    IsInitEvent = true
                 };
                 gameEventLogger.LogGameEvent(state);
             }
@@ -100,7 +108,8 @@ namespace Logic.Systems
                     Properties = propertyDict,
                     TilePosition = new Vector2Int((int)unitSetupInfo.SpawnPosition.x,
                         (int)unitSetupInfo.SpawnPosition.y),
-                    WorldPosition = unitSetupInfo.SpawnPosition
+                    WorldPosition = unitSetupInfo.SpawnPosition,
+                    IsInitEvent = true
                 };
                         
                 gameEventLogger.LogGameEvent(state);

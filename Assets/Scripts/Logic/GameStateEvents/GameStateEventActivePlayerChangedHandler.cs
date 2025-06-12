@@ -9,12 +9,16 @@ namespace Logic.GameStateEvents
         public void HandleGameEvent(BattleInstance instance, GameStateEvent gameEvent)
         {
             if (gameEvent.EventType != EGameStateEventType.PlayerTurn) return;
+            if (instance.Model.WinnerId != -1)
+            {
+                return;
+            }
 
             var gameEventPlayerChanged = gameEvent as GameStateEventPlayerChanged;
             var id = gameEventPlayerChanged.NewPlayerId;
             Debug.Log($"Player {id} is turned");
             instance.Model.SetCurrentPlayer(id);
-            instance.StateMachine.ChangeState(id == AutoResolver.Resolve<UserDataService>().LocalPlayer.Id
+            instance.StateMachine.ChangeState(gameEventPlayerChanged.NetId == AutoResolver.Resolve<UserDataService>().LocalPlayer.Id
                 ? EBattleStateId.PlayerTurn
                 : EBattleStateId.EnemyTurn);
         }

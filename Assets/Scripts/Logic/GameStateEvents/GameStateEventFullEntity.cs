@@ -12,6 +12,7 @@ namespace Logic.GameStateEvents
         public int Id;
         public string NameId;
         public int OwnerId;
+        public int NetId;
         public Vector2Int TilePosition;
         public Vector3 WorldPosition;
         public Dictionary<EPropertyType, int> Properties;
