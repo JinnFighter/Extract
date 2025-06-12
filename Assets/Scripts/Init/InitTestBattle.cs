@@ -1,4 +1,5 @@
 using Client;
+using Client.Actions;
 using Client.Replay;
 using Common;
 using Logic;
@@ -20,6 +21,7 @@ namespace Init
         [Inject] private UserDataService _userDataService;
         [Inject] private IUiService _uiService;
         [Inject] private IUnitEntitySelectorSystem _unitEntitySelectorSystem;
+        [Inject] private IActionRequestBuilderSystem _actionRequestBuilderSystem;
         [SerializeField] private ReplayService _replayService;
         private BattleScreenModel _battleScreenModel;
 
@@ -33,7 +35,8 @@ namespace Init
                 {
                     LogicModelClient = _battleInstanceClient.ModelClient,
                     ActionRequestSender = _battleInstanceClient,
-                    UserDataService = _userDataService
+                    UserDataService = _userDataService,
+                    ActionRequestBuilderSystem = _actionRequestBuilderSystem,
                 },
                 new BattleScreenStateModelEnemy(), _battleInstanceClient, _userDataService, new ModelWidgetSelectedUnit
                 {

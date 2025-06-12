@@ -1,6 +1,8 @@
 using Client;
+using Client.Actions;
 using Client.Replay;
 using Logic;
+using Logic.ActionRequests;
 using UnityEngine;
 using VContainer;
 using VContainer.Unity;
@@ -17,6 +19,7 @@ namespace Init
         {
             builder.Register<UnitEntitySelectorSystem>(Lifetime.Singleton).As<IUnitEntitySelectorSystem>();
             builder.Register<TileEntityEntitySelectorSystem>(Lifetime.Singleton).As<ITileEntitySelectorSystem>();
+            builder.Register<ActionRequestBuilderSystem>(Lifetime.Singleton).As<IActionRequestBuilderSystem>();
             builder.RegisterInstance(_battleInstance).As<BattleInstance>();
             builder.RegisterInstance(_battleInstanceClient).As<BattleInstanceClient>();
             builder.RegisterInstance(_replayService).As<ReplayService>();

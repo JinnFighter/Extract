@@ -67,10 +67,12 @@ namespace Ui.Battle
         {
             var playerEntityModel =
                 Model.LogicModelClient.GetPlayerEntity(Model.LogicModelClient.CurrentPlayerId);
-            Model.ActionRequestSender.SendActionRequest(new ActionRequestEndTurn
-            {
-                CasterId = playerEntityModel.Id
-            });
+            Model.ActionRequestBuilderSystem.Reset();
+            var action = Model.ActionRequestBuilderSystem.StartBuild(EActionRequestType.EndTurn)
+                .SetOwner(playerEntityModel.Id)
+                .SetCaster(playerEntityModel.Id)
+                .BuildAction();
+            Model.ActionRequestSender.SendActionRequest(action);
         }
     }
 }
