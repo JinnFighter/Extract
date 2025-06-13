@@ -1,4 +1,5 @@
 ﻿using Client;
+using Client.Actions;
 using Common;
 using Logic;
 using MVVM;
@@ -10,5 +11,6 @@ namespace Ui.Battle
         public LogicModelClient LogicModelClient { get; set; }
         public UserDataService UserDataService { get; set; }
         public IActionRequestSender ActionRequestSender { get; set; }
+        public IActionRequestBuilderSystem ActionRequestBuilderSystem { get; set; }
     }
 }
