@@ -2,8 +2,8 @@ using System;
 using System.Collections.Generic;
 using Common;
 using FishNet.Transporting;
+using Logic.ActionEvents;
 using Logic.ActionRequests;
-using Logic.GameStateEvents;
 
 namespace Client.GameStateEvents
 {

@@ -3,6 +3,7 @@
     public enum EActionRequestType
     {
         None,
+        Move,
         EndTurn,
     }
 }

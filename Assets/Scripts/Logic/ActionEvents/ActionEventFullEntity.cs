@@ -1,8 +1,7 @@
 ﻿using System.Collections.Generic;
-using Logic.Components;
 using UnityEngine;
 
-namespace Logic.GameStateEvents
+namespace Logic.ActionEvents
 {
     public class ActionEventFullEntity : ActionEvent
     {

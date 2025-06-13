@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using Logic;
-using Logic.GameStateEvents;
+using Logic.ActionEvents;
 
 namespace Client.Replay
 {

@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using Logic;
-using Logic.Components;
 using UnityEngine;
 
 namespace Client

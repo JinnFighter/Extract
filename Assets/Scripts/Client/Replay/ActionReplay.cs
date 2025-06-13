@@ -1,7 +1,7 @@
 ﻿using System.Collections;
 using Client.GameStateEvents;
 using Logic;
-using Logic.GameStateEvents;
+using Logic.ActionEvents;
 using UnityEngine;
 
 namespace Client.Replay

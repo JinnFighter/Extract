@@ -1,6 +1,6 @@
 ﻿using FishNet.Serializing;
 
-namespace Logic.GameStateEvents
+namespace Logic.ActionEvents
 {
     //DO NOT REMOVE -> SERIALIZER IS USED BY FISH NET THROUGH REFLECTION
     public static class ActionEventSerializer
@@ -15,6 +15,9 @@ namespace Logic.GameStateEvents
                     break;
                 case ActionEventFullEntity fullEntity:
                     writer.Write(fullEntity);
+                    break;
+                case ActionEventPositionChanged positionChanged:
+                    writer.Write(positionChanged);
                     break;
                 case ActionEventPlayerChanged playerChanged:
                     writer.Write(playerChanged);
@@ -33,6 +36,8 @@ namespace Logic.GameStateEvents
                     return reader.Read<ActionEventGameStarted>();
                 case EActionEventType.FullEntity:
                     return reader.Read<ActionEventFullEntity>();
+                case EActionEventType.PositionChanged:
+                    return reader.Read<ActionEventPositionChanged>();
                 case EActionEventType.PlayerTurn:
                     return reader.Read<ActionEventPlayerChanged>();
                 case EActionEventType.GameEnd:

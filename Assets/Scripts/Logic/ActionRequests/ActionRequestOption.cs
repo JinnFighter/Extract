@@ -1,4 +1,4 @@
-﻿using Logic.GameStateEvents;
+﻿using Logic.ActionEvents;
 
 namespace Logic.ActionRequests
 {

@@ -1,28 +1,27 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using Common;
-using Logic.Components;
+using Logic.ActionEvents;
 using Logic.Descriptions;
 using Logic.Entities;
-using Logic.GameStateEvents;
 using UnityEngine;
 
 namespace Logic.Systems
 {
     public class InitGameSystem : IInitializeSystem
     {
-        public void Initialize(GameSetupInfo setupInfo, LogicModelServer logicModelServer, GameEventLogger gameEventLogger)
+        public void Initialize(GameSetupInfo setupInfo, LogicModelServer logicModelServer, ActionEventLogger actionEventLogger)
         {
-            GenerateGameAndPlayersEntities(setupInfo, logicModelServer, gameEventLogger);
+            GenerateGameAndPlayersEntities(setupInfo, logicModelServer, actionEventLogger);
 
-            GenerateTileEntities(setupInfo, logicModelServer, gameEventLogger);
+            GenerateTileEntities(setupInfo, logicModelServer, actionEventLogger);
 
-            GenerateUnitEntities(setupInfo, logicModelServer, gameEventLogger);
+            GenerateUnitEntities(setupInfo, logicModelServer, actionEventLogger);
         }
 
-        private void GenerateGameAndPlayersEntities(GameSetupInfo setupInfo, LogicModelServer logicModelServer, GameEventLogger gameEventLogger)
+        private void GenerateGameAndPlayersEntities(GameSetupInfo setupInfo, LogicModelServer logicModelServer, ActionEventLogger actionEventLogger)
         {
-            gameEventLogger.LogGameEvent(new ActionEventGameStarted
+            actionEventLogger.LogGameEvent(new ActionEventGameStarted
             {
                 IsInitEvent = true
             });
@@ -36,7 +35,7 @@ namespace Logic.Systems
                 {
                     Id = gameEntity.Id + gameEntity.PlayerIds.Count + 1,
                     OwnerId = gameEntity.Id + gameEntity.PlayerIds.Count + 1,
-                    NetId = playerSetupInfo.Id
+                    NetId = playerSetupInfo.Id,
                 };
                 gameEntity.PlayerIds.Add(playerEntity.Id);
                 logicModelServer.PlayerEntities.Add(playerEntity.Id, playerEntity);
@@ -51,11 +50,11 @@ namespace Logic.Systems
                     Properties = playerProperties,
                     IsInitEvent = true
                 };
-                gameEventLogger.LogGameEvent(state);
+                actionEventLogger.LogGameEvent(state);
             }
         }
 
-        private void GenerateTileEntities(GameSetupInfo setupInfo, LogicModelServer logicModelServer, GameEventLogger gameEventLogger)
+        private void GenerateTileEntities(GameSetupInfo setupInfo, LogicModelServer logicModelServer, ActionEventLogger actionEventLogger)
         {
             foreach (var tileSetupInfo in setupInfo.TilesSetupInfo)
             {
@@ -75,11 +74,11 @@ namespace Logic.Systems
                     WorldPosition = tileSetupInfo.WorldPosition,
                     IsInitEvent = true
                 };
-                gameEventLogger.LogGameEvent(state);
+                actionEventLogger.LogGameEvent(state);
             }
         }
 
-        private void GenerateUnitEntities(GameSetupInfo setupInfo, LogicModelServer logicModelServer, GameEventLogger gameEventLogger)
+        private void GenerateUnitEntities(GameSetupInfo setupInfo, LogicModelServer logicModelServer, ActionEventLogger actionEventLogger)
         {
             var unitDescriptionLibrary = AutoResolver.Resolve<UnitDescriptionLibrary>();
             foreach (var unitSetupInfo in setupInfo.UnitsSetupInfo)
@@ -90,8 +89,10 @@ namespace Logic.Systems
                     Id = unitSetupInfo.Id,
                     OwnerId = unitSetupInfo.OwnerId,
                     NameId = unitSetupInfo.NameId,
+                    Position = new Vector2Int((int)unitSetupInfo.SpawnPosition.x, (int)unitSetupInfo.SpawnPosition.y),
                 };
                 logicModelServer.UnitEntities.Add(unitSetupInfo.Id, unitEntity);
+                logicModelServer.TileEntities[unitEntity.Position].OccupierId = unitEntity.Id;
 
                 var propertyDict = new Dictionary<EPropertyType, int>();
                 foreach (var propertyDesc in unitDesc.Properties.Where(propDesc => propDesc.IsInitialTag))
@@ -112,7 +113,7 @@ namespace Logic.Systems
                     IsInitEvent = true
                 };
                         
-                gameEventLogger.LogGameEvent(state);
+                actionEventLogger.LogGameEvent(state);
             }
         }
     }
