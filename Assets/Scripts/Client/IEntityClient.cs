@@ -1,4 +1,4 @@
-using Logic.Components;
+using Logic;
 
 namespace Client
 {

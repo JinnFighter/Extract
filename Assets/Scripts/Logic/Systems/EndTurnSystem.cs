@@ -1,6 +1,6 @@
 using System.Collections.Generic;
+using Logic.ActionEvents;
 using Logic.ActionRequests;
-using Logic.GameStateEvents;
 
 namespace Logic.Systems
 {
@@ -28,9 +28,9 @@ namespace Logic.Systems
             };
         }
 
-        public void Initialize(GameSetupInfo gameSetupInfo, LogicModelServer logicModelServer, GameEventLogger gameEventLogger)
+        public void Initialize(GameSetupInfo gameSetupInfo, LogicModelServer logicModelServer, ActionEventLogger actionEventLogger)
         {
-            gameEventLogger.LogGameEvent(new ActionEventPlayerChanged
+            actionEventLogger.LogGameEvent(new ActionEventPlayerChanged
             {
                 NewPlayerId = logicModelServer.GameEntityServer.CurrentPlayerId
             });

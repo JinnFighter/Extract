@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Logic;
-using Logic.GameStateEvents;
+using Logic.ActionEvents;
 using UnityEngine;
 
 namespace Client

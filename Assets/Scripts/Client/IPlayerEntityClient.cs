@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using Logic;
 using Logic.ActionRequests;
-using Logic.Components;
 
 namespace Client
 {

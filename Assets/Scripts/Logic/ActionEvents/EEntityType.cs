@@ -1,4 +1,4 @@
-﻿namespace Logic.GameStateEvents
+﻿namespace Logic.ActionEvents
 {
     public enum EEntityType
     {

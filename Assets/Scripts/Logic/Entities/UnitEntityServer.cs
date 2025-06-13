@@ -6,7 +6,6 @@ namespace Logic.Entities
     {
         public int OwnerId { get; set; }
         public string NameId { get; set; }
-        public Vector2Int Position { get; }
-        public Vector3 WorldPosition { get; }
+        public Vector2Int Position { get; set; }
     }
 }

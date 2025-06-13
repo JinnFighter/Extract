@@ -1,4 +1,4 @@
-﻿namespace Logic.GameStateEvents
+﻿namespace Logic.ActionEvents
 {
     public enum EActionEventType
     {
@@ -6,6 +6,7 @@
         GameStart,
         PlayerTurn,
         FullEntity,
+        PositionChanged,
         SequenceStart,
         SequenceEnd,
         GameEnd,

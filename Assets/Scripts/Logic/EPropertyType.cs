@@ -1,4 +1,4 @@
-﻿namespace Logic.Components
+﻿namespace Logic
 {
     public enum EPropertyType
     {

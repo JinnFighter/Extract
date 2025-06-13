@@ -1,5 +1,5 @@
-﻿using Logic.ActionRequests;
-using Logic.GameStateEvents;
+﻿using Logic.ActionEvents;
+using Logic.ActionRequests;
 
 namespace Logic.Systems
 {

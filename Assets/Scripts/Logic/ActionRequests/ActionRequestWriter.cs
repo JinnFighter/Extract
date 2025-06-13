@@ -13,6 +13,9 @@ namespace Logic.ActionRequests
                 case ActionRequestEndTurn endTurn:
                     writer.Write(endTurn);
                     break;
+                case ActionRequestMove move:
+                    writer.Write(move);
+                    break;
                 default:
                     return;
             }
@@ -25,6 +28,8 @@ namespace Logic.ActionRequests
             {
                 case EActionRequestType.EndTurn:
                     return reader.Read<ActionRequestEndTurn>();
+                case EActionRequestType.Move:
+                    return reader.Read<ActionRequestMove>();
                 default:
                     return default;
             }

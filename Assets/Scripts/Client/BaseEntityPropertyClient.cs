@@ -1,6 +1,5 @@
 ﻿using System;
 using Logic;
-using Logic.Components;
 
 namespace Client
 {

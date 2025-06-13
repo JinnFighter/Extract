@@ -2,9 +2,9 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Logic.GameStateEvents
+namespace Logic.ActionEvents
 {
-    public class GameEventLogger
+    public class ActionEventLogger
     {
         public int TurnNumber { get; private set; }
         public int EventNumber { get; private set; }

@@ -1,7 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using Client.GameStateEvents;
-using Logic.GameStateEvents;
+using Logic.ActionEvents;
 using UnityEngine;
 using VContainer;
 

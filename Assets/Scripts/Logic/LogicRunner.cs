@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
+using Logic.ActionEvents;
 using Logic.ActionRequests;
-using Logic.GameStateEvents;
 using Logic.Systems;
 
 namespace Logic
@@ -8,7 +8,7 @@ namespace Logic
     public class LogicRunner
     {
         private bool _isStarted;
-        private readonly GameEventLogger _logger = new();
+        private readonly ActionEventLogger _logger = new();
         private IGameEventSender _gameEventSender;
         private readonly LogicModelServer _logicModelServer = new();
         private ILogicSystem _rootSystem;
@@ -17,6 +17,7 @@ namespace Logic
         private readonly Dictionary<EActionRequestType, ILogicSystem> _requestSystems = new()
         {
             { EActionRequestType.EndTurn, new EndTurnSystem() },
+            { EActionRequestType.Move, new MoveActionRequestSystem() }
         };
         private readonly List<IInitializeSystem> _initializeSystems = new()
         {
@@ -91,8 +92,25 @@ namespace Logic
             }
             
             _rootSystem = _requestSystems[request.ActionRequestType];
+            
+            RunEventSequence(request, _rootSystem);
+            
+            foreach (var postRunSystem in _postRunSystems)
+            {
+                RunEventSequence(request, postRunSystem);
+            }
+            
+            foreach (var postRunOptionSystem in _postRunOptionSystems)
+            {
+                postRunOptionSystem.Run(_logicModelServer, _gameEventSender);
+            }
 
-            var sequence = CreateGameStateEventSequence(request, _logicModelServer, _rootSystem);
+            _rootSystem = null;
+        }
+        
+        private void RunEventSequence(ActionRequest request, ILogicSystem system)
+        {
+            var sequence = CreateGameStateEventSequence(request, _logicModelServer, system);
 
             while (sequence.MoveNext())
             {
@@ -106,31 +124,6 @@ namespace Logic
                     _logger.LogGameEvent(gameStateEvent);
                 }
             }
-            
-            foreach (var postRunSystem in _postRunSystems)
-            {
-                var postSequence = CreateGameStateEventSequence(request, _logicModelServer, postRunSystem);
-
-                while (postSequence.MoveNext())
-                {
-                    var gameStateEvents = postSequence.Current;
-                    if (gameStateEvents == null)
-                    {
-                        continue;
-                    }
-                    foreach (var gameStateEvent in gameStateEvents)
-                    {
-                        _logger.LogGameEvent(gameStateEvent);
-                    }
-                }
-            }
-            
-            foreach (var postRunOptionSystem in _postRunOptionSystems)
-            {
-                postRunOptionSystem.Run(_logicModelServer, _gameEventSender);
-            }
-
-            _rootSystem = null;
         }
 
         private IEnumerator<List<ActionEvent>> CreateGameStateEventSequence(ActionRequest rootRequest, LogicModelServer logicModelServer, ILogicSystem logicSystem)
@@ -144,8 +137,31 @@ namespace Logic
 
         private IEnumerator<List<ActionEvent>> RunSystemSequence(ActionRequest rootRequest, LogicModelServer logicModelServer, ILogicSystem logicSystem)
         {
+            var prepareRun = logicSystem.RunPrepareLogic(rootRequest, logicModelServer);
+            while (prepareRun.MoveNext())
+            {
+                yield return prepareRun.Current;
+            }
+
+            if (logicSystem.IsCancelled)
+            {
+                var cancelRun = logicSystem.RunCancelLogic(rootRequest, logicModelServer);
+                while (cancelRun.MoveNext())
+                {
+                    yield return cancelRun.Current;
+                }
+                
+                yield break;
+            }
+            
             var logicRun = logicSystem.RunLogic(rootRequest, logicModelServer);
             while (logicRun.MoveNext())
+            {
+                yield return logicRun.Current;
+            }
+            
+            var finishRun = logicSystem.RunFinishLogic(rootRequest, logicModelServer);
+            while (finishRun.MoveNext())
             {
                 yield return logicRun.Current;
             }
