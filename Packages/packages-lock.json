@@ -9,13 +9,6 @@
       },
       "hash": "3265aff51f155b8f31e41850dfa3bcf0c886e700"
     },
-    "com.leopotam.ecs": {
-      "version": "https://github.com/Leopotam/ecs.git",
-      "depth": 0,
-      "source": "git",
-      "dependencies": {},
-      "hash": "1213c31c9ef8325d48e74a52b345c4db242d038b"
-    },
     "com.unity.2d.tilemap": {
       "version": "1.0.0",
       "depth": 0,

@@ -1,7 +1,6 @@
 {
   "dependencies": {
     "com.abzorba.artificetoolkit": "https://github.com/AbZorbaGames/artificetoolkit.git",
-    "com.leopotam.ecs": "https://github.com/Leopotam/ecs.git",
     "com.unity.2d.tilemap": "1.0.0",
     "com.unity.2d.tilemap.extras": "4.3.1",
     "com.unity.ai.navigation": "2.0.8",
