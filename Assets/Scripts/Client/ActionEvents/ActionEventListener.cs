@@ -5,7 +5,7 @@ using FishNet.Transporting;
 using Logic.ActionEvents;
 using Logic.ActionRequests;
 
-namespace Client.GameStateEvents
+namespace Client.ActionEvents
 {
     public class ActionEventListener
     {

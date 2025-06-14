@@ -18,3 +18,5 @@ MonoBehaviour:
   - <PropertyType>k__BackingField: 1
     <DefaultValue>k__BackingField: 100
     <IsInitialTag>k__BackingField: 1
+  <Actions>k__BackingField:
+  - {fileID: 11400000, guid: 11398ded579a46e40a856f20b71d9445, type: 2}

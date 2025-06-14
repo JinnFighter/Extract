@@ -7,9 +7,10 @@ namespace Client.Actions
 {
     public class ActionRequestBuilderSystem : IActionRequestBuilderSystem
     {
-        private Dictionary<EActionRequestType, IActionRequestBuilder> _actionRequestBuilders = new()
+        private readonly Dictionary<EActionRequestType, IActionRequestBuilder> _actionRequestBuilders = new()
         {
             { EActionRequestType.EndTurn , new ActionRequestBuilderEndTurn() },
+            { EActionRequestType.Move , new ActionRequestBuilderMove() }
         };
         private IActionRequestBuilder _currentBuilder;
         public event Action OnReset;

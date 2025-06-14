@@ -41,6 +41,9 @@ namespace Init
                 new BattleScreenStateModelEnemy(), _battleInstanceClient, _userDataService, new ModelWidgetSelectedUnit
                 {
                     SelectorSystem = _unitEntitySelectorSystem,
+                },new WidgetSelectedUnitOptionsModel()
+                {
+                    SelectorSystem = _unitEntitySelectorSystem,
                 });
             _uiService.Open<UiBattleScreen>(_battleScreenModel, typeof(BattleScreenView));
         }

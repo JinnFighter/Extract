@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using Logic;
 using Logic.ActionRequests;
 using UnityEngine;
 
@@ -10,13 +9,30 @@ namespace Client
     {
         public int Id { get; set; }
         public int OwnerId { get; set; }
-        public Vector2Int Position { get; set; }
+        public event Action<Vector2Int> OnPositionUpdated;
+        public Vector2Int Position
+        {
+            get => _position;
+            set
+            {
+                if (_position == value)
+                {
+                    return;
+                }
+                
+                _position = value;
+                OnPositionUpdated?.Invoke(_position);
+            }
+        }
+
         public Vector3 WorldPosition { get; set; }
         public int TeamId { get; set; }
         public string NameId { get; set; }
         public event Action<ActionRequestOption> OnOptionAdded;
         public event Action<ActionRequestOption> OnOptionRemoved;
         public Dictionary<EActionRequestType, ActionRequestOption> ActionRequestOptions { get; } = new();
+
+        private Vector2Int _position;
         
         public void AddOption(ActionRequestOption option)
         {

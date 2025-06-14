@@ -34,7 +34,8 @@ namespace Logic.Systems
                 yield return new ActionEventPositionChanged
                 {
                     OldPosition = currentPosition,
-                    NewPosition = nextPosition
+                    NewPosition = nextPosition,
+                    UnitId = unitModel.Id,
                 };
             }
         }

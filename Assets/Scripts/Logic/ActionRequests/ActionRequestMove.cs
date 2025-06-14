@@ -16,7 +16,7 @@ namespace Logic.ActionRequests
                 if (logicModelServer.TileEntities[position].OccupierId >= 0)
                     return false;
 
-            return false;
+            return true;
         }
     }
 }

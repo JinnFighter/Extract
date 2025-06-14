@@ -1,6 +1,6 @@
 ﻿using Logic.ActionEvents;
 
-namespace Client.GameStateEvents
+namespace Client.ActionEvents
 {
     public interface IActionEventHandler
     {

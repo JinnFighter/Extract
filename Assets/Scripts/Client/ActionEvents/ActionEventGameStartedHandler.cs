@@ -1,7 +1,7 @@
-﻿using Logic.ActionEvents;
-using Logic.States;
+﻿using Client.States;
+using Logic.ActionEvents;
 
-namespace Client.GameStateEvents
+namespace Client.ActionEvents
 {
     public class ActionEventGameStartedHandler : IActionEventHandler
     {

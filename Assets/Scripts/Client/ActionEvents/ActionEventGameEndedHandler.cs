@@ -1,8 +1,8 @@
-﻿using Logic.ActionEvents;
-using Logic.States;
+﻿using Client.States;
+using Logic.ActionEvents;
 using UnityEngine;
 
-namespace Client.GameStateEvents
+namespace Client.ActionEvents
 {
     public class ActionEventGameEndedHandler : IActionEventHandler
     {

@@ -1,6 +1,4 @@
-﻿using Logic.States;
-
-namespace Client.States
+﻿namespace Client.States
 {
     public class BattleStateInit : BattleState
     {

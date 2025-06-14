@@ -16,6 +16,12 @@ namespace Logic.ActionEvents
                 case ActionEventFullEntity fullEntity:
                     writer.Write(fullEntity);
                     break;
+                case ActionEventSequenceStart sequenceStart:
+                    writer.Write(sequenceStart);
+                    break;
+                case ActionEventSequenceEnd sequenceEnd:
+                    writer.Write(sequenceEnd);
+                    break;
                 case ActionEventPositionChanged positionChanged:
                     writer.Write(positionChanged);
                     break;
@@ -36,6 +42,10 @@ namespace Logic.ActionEvents
                     return reader.Read<ActionEventGameStarted>();
                 case EActionEventType.FullEntity:
                     return reader.Read<ActionEventFullEntity>();
+                case EActionEventType.SequenceStart:
+                    return reader.Read<ActionEventSequenceStart>();
+                case EActionEventType.SequenceEnd:
+                    return reader.Read<ActionEventSequenceEnd>();
                 case EActionEventType.PositionChanged:
                     return reader.Read<ActionEventPositionChanged>();
                 case EActionEventType.PlayerTurn:

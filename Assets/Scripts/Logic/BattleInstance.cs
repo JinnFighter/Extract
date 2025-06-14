@@ -13,7 +13,7 @@ using Channel = FishNet.Transporting.Channel;
 
 namespace Logic
 {
-    public class BattleInstance : NetworkBehaviour, IGameEventSender
+    public class BattleInstance : NetworkBehaviour, IActionEventSender
     {
         [SerializeField] private GameFieldSetup _gameFieldSetup;
         private readonly LogicRunner _logicRunner = new();
@@ -21,7 +21,7 @@ namespace Logic
         [Inject] private NetworkService _networkService;
         [Inject] private UserDataService _userDataService;
 
-        public void SendGameEvent(ActionEvent actionEvent)
+        public void SendActionEvent(ActionEvent actionEvent)
         {
             if (!IsServerInitialized) return;
 

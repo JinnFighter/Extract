@@ -75,5 +75,16 @@ namespace UiService.Code.Widgets
         {
             UiService.OpenEmbedded<TWidget>(model, view, Model);
         }
+
+        protected void OpenEmbedded<TWidget>(IModel model, UiView view)
+            where TWidget : IUiWidget
+        {
+            UiService.OpenEmbedded<TWidget>(model, view, Model);
+        }
+
+        protected void Close(IModel model)
+        {
+            UiService.Close(model);
+        }
     }
 }
