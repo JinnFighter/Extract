@@ -5,21 +5,21 @@ using UnityEngine;
 
 namespace Client.ActionEvents
 {
-    public class ActionEventActivePlayerChangedHandler : IActionEventHandler
+    public class ActionEventActivePlayerChangedHandler : BaseActionEventHandler<ActionEventPlayerChanged>
     {
-        public void HandleActionEvent(BattleInstanceClient instance, ActionEvent gameEvent)
+        public override EActionEventType RequestedType => EActionEventType.PlayerTurn;
+
+        protected override void HandleActionEventInner(BattleInstanceClient instance, ActionEventPlayerChanged gameEvent)
         {
-            if (gameEvent.EventType != EActionEventType.PlayerTurn) return;
             if (instance.ModelClient.WinnerId != -1)
             {
                 return;
             }
-
-            var gameEventPlayerChanged = gameEvent as ActionEventPlayerChanged;
-            var id = gameEventPlayerChanged.NewPlayerId;
+            
+            var id = gameEvent.NewPlayerId;
             Debug.Log($"Player {id} is turned");
             instance.ModelClient.SetCurrentPlayer(id);
-            instance.StateMachine.ChangeState(gameEventPlayerChanged.NetId == AutoResolver.Resolve<UserDataService>().LocalPlayer.Id
+            instance.StateMachine.ChangeState(gameEvent.NetId == AutoResolver.Resolve<UserDataService>().LocalPlayer.Id
                 ? EBattleStateId.PlayerTurn
                 : EBattleStateId.EnemyTurn);
         }

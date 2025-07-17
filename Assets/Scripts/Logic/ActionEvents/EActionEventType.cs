@@ -3,6 +3,7 @@
     public enum EActionEventType
     {
         None,
+        InitStart,
         GameStart,
         PlayerTurn,
         FullEntity,

@@ -4,7 +4,7 @@ using Logic.ActionRequests;
 
 namespace Logic.Systems
 {
-    public class EndTurnSystem : BaseLogicSystem, IInitializeSystem
+    public class EndTurnSystem : BaseLogicSystem
     {
         protected override IEnumerator<ActionEvent> RunLogicInner(ActionRequest rootRequest, LogicModelServer modelServer)
         {
@@ -26,14 +26,6 @@ namespace Logic.Systems
                 NewPlayerId = modelServer.GameEntityServer.CurrentPlayerId,
                 NetId = modelServer.PlayerEntities[modelServer.GameEntityServer.CurrentPlayerId].NetId
             };
-        }
-
-        public void Initialize(GameSetupInfo gameSetupInfo, LogicModelServer logicModelServer, ActionEventLogger actionEventLogger)
-        {
-            actionEventLogger.LogGameEvent(new ActionEventPlayerChanged
-            {
-                NewPlayerId = logicModelServer.GameEntityServer.CurrentPlayerId
-            });
         }
     }
 }

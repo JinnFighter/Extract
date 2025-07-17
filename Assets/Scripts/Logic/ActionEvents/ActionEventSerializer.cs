@@ -10,8 +10,11 @@ namespace Logic.ActionEvents
             writer.Write((int)actionEvent.EventType);
             switch (actionEvent)
             {
-                case ActionEventGameStarted gameStarted:
-                    writer.Write(gameStarted);
+                case ActionEventInitStarted initStarted:
+                    writer.Write(initStarted);
+                    break;
+                case ActionEventGameStart gameStart:
+                    writer.Write(gameStart);
                     break;
                 case ActionEventFullEntity fullEntity:
                     writer.Write(fullEntity);
@@ -36,25 +39,18 @@ namespace Logic.ActionEvents
         public static ActionEvent ReadActionEvent(this Reader reader)
         {
             var id = reader.ReadInt32();
-            switch ((EActionEventType)id)
+            return (EActionEventType)id switch
             {
-                case EActionEventType.GameStart:
-                    return reader.Read<ActionEventGameStarted>();
-                case EActionEventType.FullEntity:
-                    return reader.Read<ActionEventFullEntity>();
-                case EActionEventType.SequenceStart:
-                    return reader.Read<ActionEventSequenceStart>();
-                case EActionEventType.SequenceEnd:
-                    return reader.Read<ActionEventSequenceEnd>();
-                case EActionEventType.PositionChanged:
-                    return reader.Read<ActionEventPositionChanged>();
-                case EActionEventType.PlayerTurn:
-                    return reader.Read<ActionEventPlayerChanged>();
-                case EActionEventType.GameEnd:
-                    return reader.Read<ActionEventGameEnded>();
-                default:
-                    return null;
-            }
+                EActionEventType.InitStart => reader.Read<ActionEventInitStarted>(),
+                EActionEventType.GameStart => reader.Read<ActionEventGameStart>(),
+                EActionEventType.FullEntity => reader.Read<ActionEventFullEntity>(),
+                EActionEventType.SequenceStart => reader.Read<ActionEventSequenceStart>(),
+                EActionEventType.SequenceEnd => reader.Read<ActionEventSequenceEnd>(),
+                EActionEventType.PositionChanged => reader.Read<ActionEventPositionChanged>(),
+                EActionEventType.PlayerTurn => reader.Read<ActionEventPlayerChanged>(),
+                EActionEventType.GameEnd => reader.Read<ActionEventGameEnded>(),
+                _ => null
+            };
         }
     }
 }

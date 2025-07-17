@@ -1,6 +1,5 @@
 using System.Collections;
 using System.Collections.Generic;
-using Client.ActionEvents;
 using Logic.ActionEvents;
 using UnityEngine;
 using VContainer;
@@ -9,14 +8,6 @@ namespace Client.Replay
 {
     public class ReplayService : MonoBehaviour
     {
-        private readonly Dictionary<EActionEventType, IActionEventHandler> _eventHandlers = new()
-        {
-            { EActionEventType.PlayerTurn, new ActionEventActivePlayerChangedHandler() },
-            { EActionEventType.FullEntity, new ActionEventFullEntityHandler() },
-            { EActionEventType.PositionChanged, new ActionEventPositionChangedHandler() },
-            { EActionEventType.GameEnd, new ActionEventGameEndedHandler() }
-        };
-
         private readonly Dictionary<EActionEventType, IActionViewer> _eventViewers = new();
 
         private readonly Queue<List<ActionReplay>> _unplayedSequences = new();
@@ -59,7 +50,7 @@ namespace Client.Replay
 
         private ActionReplay ParseEvent(ActionEvent actionEvent)
         {
-            var isPresent = _eventHandlers.TryGetValue(actionEvent.EventType, out var handler);
+            var isPresent = _battleInstance.ActionEventListener.EventHandlers.TryGetValue(actionEvent.EventType, out var handler);
             if (!isPresent)
             {
                 return null;

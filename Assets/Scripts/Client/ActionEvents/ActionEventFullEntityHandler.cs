@@ -3,38 +3,34 @@ using UnityEngine;
 
 namespace Client.ActionEvents
 {
-    public class ActionEventFullEntityHandler : IActionEventHandler
+    public class ActionEventFullEntityHandler : BaseActionEventHandler<ActionEventFullEntity>
     {
-        public void HandleActionEvent(BattleInstanceClient instance, ActionEvent gameEvent)
-        {
-            if (gameEvent.EventType != EActionEventType.FullEntity)
-            {
-                return;
-            }
+        public override EActionEventType RequestedType => EActionEventType.FullEntity;
 
-            var eventData = gameEvent as ActionEventFullEntity;
-            Debug.Log($"eventData: {eventData.EntityType}");
-            switch (eventData.EntityType)
+        protected override void HandleActionEventInner(BattleInstanceClient instance, ActionEventFullEntity gameEvent)
+        {
+            Debug.Log($"Full Entity Received, eventData: {gameEvent.EntityType}");
+            switch (gameEvent.EntityType)
             {
                 case EEntityType.Player:
-                    instance.ModelClient.AddPlayer(eventData);
+                    instance.ModelClient.AddPlayer(gameEvent);
                     break;
                 case EEntityType.Unit:
-                    if (instance.ModelClient.UnitEntityModels.TryGetValue(eventData.Id, out _))
+                    if (instance.ModelClient.UnitEntityModels.TryGetValue(gameEvent.Id, out _))
                     {
                         return;
                     }
 
-                    instance.ModelClient.AddUnit(eventData);
+                    instance.ModelClient.AddUnit(gameEvent);
                     break;
                 case EEntityType.Tile:
 
-                    if (instance.ModelClient.TileEntityModels.TryGetValue(eventData.TilePosition, out _))
+                    if (instance.ModelClient.TileEntityModels.TryGetValue(gameEvent.TilePosition, out _))
                     {
                         return;
                     };
                     
-                    instance.ModelClient.AddTile(eventData);
+                    instance.ModelClient.AddTile(gameEvent);
                     break;
                 default:
                     return;
