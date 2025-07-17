@@ -1,9 +1,9 @@
-﻿using Common;
+﻿using Client.States;
+using Common;
 using Logic.ActionEvents;
-using Logic.States;
 using UnityEngine;
 
-namespace Client.GameStateEvents
+namespace Client.ActionEvents
 {
     public class ActionEventActivePlayerChangedHandler : IActionEventHandler
     {

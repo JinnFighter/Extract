@@ -3,9 +3,9 @@ using Logic.ActionRequests;
 
 namespace Logic
 {
-    public interface IGameEventSender
+    public interface IActionEventSender
     {
-        void SendGameEvent(ActionEvent actionEvent);
+        void SendActionEvent(ActionEvent actionEvent);
         void SendOption(ActionRequestOption option);
     }
 }

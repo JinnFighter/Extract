@@ -9,5 +9,6 @@ namespace Logic.Descriptions
         [field: SerializeField] public string NameId { get; private set; }
         [field: SerializeField] public string ViewNameId { get; private set; }
         [field: SerializeField] public List<EntityPropertyDescription> Properties { get; private set; }
+        [field: SerializeField] public List<ActionDescription> Actions { get; private set; }
     }
 }

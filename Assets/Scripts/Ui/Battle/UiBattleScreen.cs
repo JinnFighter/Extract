@@ -1,5 +1,4 @@
 using Client.States;
-using Logic.States;
 using UiService.Code.Widgets;
 
 namespace Ui.Battle
@@ -10,24 +9,19 @@ namespace Ui.Battle
         {
             RegisterState<BattleScreenStateAlly>(Model.ModelAlly, View.ScreenStateViewAlly);
             RegisterState<BattleScreenStateEnemy>(Model.ModelEnemy, View.ScreenStateViewEnemy);
+            RegisterState<BattleScreenStateActionSelectTile>(Model.ModelSelectTile, View.ScreenStateViewActionSelectTile);
             RegisterState<BattleScreenStateGameOver>(Model.GameOverModel, View.ScreenStateViewGameOver);
         }
 
         protected override void InitCommon()
         {
-            Model.BattleStateMachine.OnStateChanged += HandleStateChanged;
-            HandleStateChanged(Model.BattleStateMachine.CurrentState,
-                Model.BattleStateMachine.CurrentState);
-        }
-
-        protected override void TerminateCommon()
-        {
-            Model.BattleStateMachine.OnStateChanged -= HandleStateChanged;
+            SubscriptionAggregator.ListenEvent(Model.BattleStateMachine.OnStateEntered, HandleStateChanged);
         }
 
         protected override void RegisterChildWidgets()
         {
             RegisterChildWidget<WidgetSelectedUnit>(Model.ModelWidgetSelectedUnit, View.SelectedUnit);
+            RegisterChildWidget<WidgetSelectedUnitOptions>(Model.ModelSelectedUnitOptions, View.SelectedUnitOptions);
         }
 
         private void HandleStateChanged(BattleState oldState, BattleState newState)
@@ -42,6 +36,9 @@ namespace Ui.Battle
                     break;
                 case EBattleStateId.EnemyTurn:
                     StateRouter.SwitchState<BattleScreenStateEnemy>();
+                    break;
+                case EBattleStateId.ActionSelectTile:
+                    StateRouter.SwitchState<BattleScreenStateActionSelectTile>();
                     break;
                 default:
                     return;

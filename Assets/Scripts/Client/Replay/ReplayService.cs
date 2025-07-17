@@ -1,6 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
-using Client.GameStateEvents;
+using Client.ActionEvents;
 using Logic.ActionEvents;
 using UnityEngine;
 using VContainer;
@@ -13,6 +13,7 @@ namespace Client.Replay
         {
             { EActionEventType.PlayerTurn, new ActionEventActivePlayerChangedHandler() },
             { EActionEventType.FullEntity, new ActionEventFullEntityHandler() },
+            { EActionEventType.PositionChanged, new ActionEventPositionChangedHandler() },
             { EActionEventType.GameEnd, new ActionEventGameEndedHandler() }
         };
 
@@ -39,6 +40,10 @@ namespace Client.Replay
             foreach (var gameStateEvent in gameStateEvents)
             {
                 var actionReplay = ParseEvent(gameStateEvent);
+                if (actionReplay == null)
+                {
+                    continue;
+                }
                 currentSequence.Add(actionReplay);
             }
             
@@ -54,11 +59,16 @@ namespace Client.Replay
 
         private ActionReplay ParseEvent(ActionEvent actionEvent)
         {
+            var isPresent = _eventHandlers.TryGetValue(actionEvent.EventType, out var handler);
+            if (!isPresent)
+            {
+                return null;
+            }
             _eventViewers.TryGetValue(actionEvent.EventType, out var viewer);
             var replay = new ActionReplay
             {
                 ActionEvent = actionEvent,
-                EventHandler = _eventHandlers[actionEvent.EventType],
+                EventHandler = handler,
                 Viewer = viewer
             };
             return replay;

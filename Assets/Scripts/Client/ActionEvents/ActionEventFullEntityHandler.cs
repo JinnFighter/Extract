@@ -1,7 +1,7 @@
 ﻿using Logic.ActionEvents;
 using UnityEngine;
 
-namespace Client.GameStateEvents
+namespace Client.ActionEvents
 {
     public class ActionEventFullEntityHandler : IActionEventHandler
     {

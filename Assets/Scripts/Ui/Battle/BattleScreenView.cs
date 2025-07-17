@@ -8,7 +8,9 @@ namespace Ui.Battle
     {
         [field: SerializeField] public BattleScreenStateViewAlly ScreenStateViewAlly { get; private set; }
         [field: SerializeField] public BattleScreenStateViewEnemy ScreenStateViewEnemy { get; private set; }
+        [field: SerializeField] public BattleScreenStateActionSelectTileView ScreenStateViewActionSelectTile { get; private set; }
         [field: SerializeField] public BattleScreenStateViewGameOver ScreenStateViewGameOver { get; private set; }
         [field: SerializeField] public ViewWidgetSelectedUnit SelectedUnit { get; private set; }
+        [field: SerializeField] public WidgetViewSelectedUnitOptions SelectedUnitOptions { get; private set; }
     }
 }

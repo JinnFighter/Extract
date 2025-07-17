@@ -72,6 +72,8 @@ namespace Client
                 WorldPosition = entity.WorldPosition
             };
 
+            TileEntityModels[model.Position].OccupierId = model.Id;
+
             foreach (var kvp in entity.Properties)
             {
                 model.Set(kvp.Key, kvp.Value);

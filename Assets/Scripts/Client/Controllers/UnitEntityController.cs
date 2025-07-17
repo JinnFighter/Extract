@@ -7,6 +7,7 @@ namespace Client.Controllers
         private readonly List<IUnitEntityController> _unitControllers = new()
         {
             new UnitEntitySelectorController(),
+            new UnitEntityMovementController(),
         };
 
         protected override void InitInner()

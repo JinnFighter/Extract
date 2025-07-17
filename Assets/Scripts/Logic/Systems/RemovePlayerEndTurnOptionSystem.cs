@@ -7,11 +7,11 @@ namespace Logic.Systems
     {
         #region IOptionSystem Members
 
-        public void Run(LogicModelServer modelServer, IGameEventSender gameEventSender)
+        public void Run(LogicModelServer modelServer, IActionEventSender actionEventSender)
         {
             modelServer.PlayerEntities[modelServer.GameEntityServer.CurrentPlayerId].CurrentOptions.Remove(EActionRequestType.EndTurn);
 
-            gameEventSender.SendOption(new ActionRequestOption
+            actionEventSender.SendOption(new ActionRequestOption
             {
                 EntityId = modelServer.GameEntityServer.CurrentPlayerId,
                 EntityType = EEntityType.Player,

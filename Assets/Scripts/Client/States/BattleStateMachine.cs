@@ -2,8 +2,8 @@ using System;
 using System.Collections.Generic;
 using Common;
 using Logic;
-using Logic.States;
 using UnityEngine;
+using UnityEngine.Events;
 
 namespace Client.States
 {
@@ -13,9 +13,12 @@ namespace Client.States
         {
             { EBattleStateId.Init, new BattleStateInit() },
             { EBattleStateId.PlayerTurn, new BattleStatePlayerTurn() },
+            { EBattleStateId.ActionSelectTile, new BattleStateActionSelectTile()},
             { EBattleStateId.EnemyTurn, new BattleStateEnemyTurn() },
             { EBattleStateId.GameOver, new BattleStateGameOver() }
         };
+        
+        private readonly Stack<EBattleStateId> _stateStack = new();
 
         public BattleStateMachine(BattleInstanceClient battleInstance, GameFieldSetup gameFieldSetup,
             UserDataService userDataService, LobbyService lobbyService, NetworkService networkService)
@@ -36,6 +39,7 @@ namespace Client.States
         public GameFieldSetup GameFieldSetup { get; }
 
         public event Action<BattleState, BattleState> OnStateChanged;
+        public UnityEvent<BattleState, BattleState> OnStateEntered { get; } = new();
 
         public void Init()
         {
@@ -49,23 +53,37 @@ namespace Client.States
         {
             CurrentState.Exit();
             _states.Clear();
+            _stateStack.Clear();
         }
 
-        public void ChangeState(EBattleStateId eBattleStateId)
+        public void ChangeState(EBattleStateId battleStateId)
         {
-            Debug.Log($"Changing state to {eBattleStateId}");
-            if (CurrentState.Id == eBattleStateId) return;
+            Debug.Log($"Changing state to {battleStateId}");
+            if (CurrentState.Id == battleStateId) return;
 
             if (IsInTransition) return;
 
             IsInTransition = true;
             var oldState = CurrentState;
             CurrentState.Exit();
-            CurrentState = _states[eBattleStateId];
+            CurrentState = _states[battleStateId];
             CurrentState.Enter();
             var newState = CurrentState;
             IsInTransition = false;
             OnStateChanged?.Invoke(oldState, newState);
+            OnStateEntered.Invoke(oldState, newState);
+        }
+
+        public void PushState(EBattleStateId battleStateId)
+        {
+            _stateStack.Push(CurrentState.Id);
+            ChangeState(battleStateId);
+        }
+
+        public void PopState()
+        {
+            if (_stateStack.Count == 0) return;
+            ChangeState(_stateStack.Pop());
         }
     }
 }

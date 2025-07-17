@@ -13,4 +13,8 @@ MonoBehaviour:
   m_Name: ActionDescriptionsLibrary
   m_EditorClassIdentifier: 
   <ActionDescriptions>k__BackingField:
-    list: []
+    list:
+    - Key: EndTurn
+      Value: {fileID: 11400000, guid: 7ea0bb8d264380e43bffc6909160a478, type: 2}
+    - Key: Move
+      Value: {fileID: 11400000, guid: 11398ded579a46e40a856f20b71d9445, type: 2}

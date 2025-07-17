@@ -18,6 +18,7 @@ MonoBehaviour:
   references:
     version: 2
     RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }
     - rid: 3208242176244580617
       type: {class: ActionBuildStepDescriptionEndTurn, ns: Logic.Descriptions, asm: Logic}
-      data: 

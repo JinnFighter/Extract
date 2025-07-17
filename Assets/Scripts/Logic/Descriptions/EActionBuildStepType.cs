@@ -3,6 +3,7 @@
     public enum EActionBuildStepType
     {
         None,
+        SelectTileMovement,
         EndTurn
     }
 }

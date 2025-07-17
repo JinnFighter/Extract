@@ -1,6 +1,8 @@
 using Client;
 using Client.Actions;
+using Client.Pathfinding;
 using Client.Replay;
+using Common;
 using Logic;
 using Logic.ActionRequests;
 using UnityEngine;
@@ -20,6 +22,8 @@ namespace Init
             builder.Register<UnitEntitySelectorSystem>(Lifetime.Singleton).As<IUnitEntitySelectorSystem>();
             builder.Register<TileEntityEntitySelectorSystem>(Lifetime.Singleton).As<ITileEntitySelectorSystem>();
             builder.Register<ActionRequestBuilderSystem>(Lifetime.Singleton).As<IActionRequestBuilderSystem>();
+            builder.Register<ClientTileMovePriceGetter>(Lifetime.Singleton).As<ITileMovePriceGetter>();
+            builder.Register<PathfinderService>(Lifetime.Singleton).As<IPathfinderService>();
             builder.RegisterInstance(_battleInstance).As<BattleInstance>();
             builder.RegisterInstance(_battleInstanceClient).As<BattleInstanceClient>();
             builder.RegisterInstance(_replayService).As<ReplayService>();

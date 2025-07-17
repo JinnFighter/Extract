@@ -9,7 +9,7 @@ namespace Logic
     {
         private bool _isStarted;
         private readonly ActionEventLogger _logger = new();
-        private IGameEventSender _gameEventSender;
+        private IActionEventSender _actionEventSender;
         private readonly LogicModelServer _logicModelServer = new();
         private ILogicSystem _rootSystem;
         public bool IsRunning => _rootSystem != null;
@@ -40,14 +40,14 @@ namespace Logic
             new AddPlayerEndTurnOptionSystem()
         };
         
-        public void StartGameLogic(GameSetupInfo gameSetupInfo, IGameEventSender gameEventSender)
+        public void StartGameLogic(GameSetupInfo gameSetupInfo, IActionEventSender actionEventSender)
         {
             if (_isStarted)
             {
                 return;
             }
             
-            _gameEventSender = gameEventSender;
+            _actionEventSender = actionEventSender;
             
             _isStarted = true;
             _logger.OnEventsLogged += HandleEventsLogged;
@@ -59,7 +59,7 @@ namespace Logic
 
             foreach (var postRunOptionSystem in _postRunOptionSystems)
             {
-                postRunOptionSystem.Run(_logicModelServer, _gameEventSender);
+                postRunOptionSystem.Run(_logicModelServer, _actionEventSender);
             }
         }
         
@@ -88,7 +88,7 @@ namespace Logic
 
             foreach (var preRunOptionSystem in _preRunOptionSystems)
             {
-                preRunOptionSystem.Run(_logicModelServer, _gameEventSender);
+                preRunOptionSystem.Run(_logicModelServer, _actionEventSender);
             }
             
             _rootSystem = _requestSystems[request.ActionRequestType];
@@ -102,7 +102,7 @@ namespace Logic
             
             foreach (var postRunOptionSystem in _postRunOptionSystems)
             {
-                postRunOptionSystem.Run(_logicModelServer, _gameEventSender);
+                postRunOptionSystem.Run(_logicModelServer, _actionEventSender);
             }
 
             _rootSystem = null;
@@ -171,7 +171,7 @@ namespace Logic
         {
             foreach (var gameStateEvent in obj)
             {
-                _gameEventSender.SendGameEvent(gameStateEvent);
+                _actionEventSender.SendActionEvent(gameStateEvent);
             }
         }
 
