@@ -17,11 +17,18 @@ namespace Logic.Systems
             GenerateTileEntities(setupInfo, logicModelServer, actionEventLogger);
 
             GenerateUnitEntities(setupInfo, logicModelServer, actionEventLogger);
+            
+            actionEventLogger.LogGameEvent(new ActionEventGameStart
+            {
+                IsInitEvent = true,
+                NewPlayerId = logicModelServer.GameEntityServer.CurrentPlayerId,
+                NetId = logicModelServer.PlayerEntities[logicModelServer.GameEntityServer.CurrentPlayerId].NetId,
+            });
         }
 
         private void GenerateGameAndPlayersEntities(GameSetupInfo setupInfo, LogicModelServer logicModelServer, ActionEventLogger actionEventLogger)
         {
-            actionEventLogger.LogGameEvent(new ActionEventGameStarted
+            actionEventLogger.LogGameEvent(new ActionEventInitStarted
             {
                 IsInitEvent = true
             });

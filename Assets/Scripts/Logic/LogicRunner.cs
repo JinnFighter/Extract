@@ -22,7 +22,6 @@ namespace Logic
         private readonly List<IInitializeSystem> _initializeSystems = new()
         {
             new InitGameSystem(),
-            new EndTurnSystem()
         };
 
         private readonly List<ILogicSystem> _postRunSystems = new()

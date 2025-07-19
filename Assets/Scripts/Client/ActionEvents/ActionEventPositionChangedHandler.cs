@@ -2,22 +2,18 @@
 
 namespace Client.ActionEvents
 {
-    public class ActionEventPositionChangedHandler : IActionEventHandler
+    public class ActionEventPositionChangedHandler : BaseActionEventHandler<ActionEventPositionChanged>
     {
-        public void HandleActionEvent(BattleInstanceClient instance, ActionEvent gameEvent)
+        public override EActionEventType RequestedType => EActionEventType.PositionChanged;
+
+        protected override void HandleActionEventInner(BattleInstanceClient instance, ActionEventPositionChanged gameEvent)
         {
-            if (gameEvent.EventType != EActionEventType.PositionChanged)
-            {
-                return;
-            }
-                
-            var positionEvent = (ActionEventPositionChanged)gameEvent;
-            var oldTile = instance.ModelClient.TileEntityModels[positionEvent.OldPosition];
-            var nextTile = instance.ModelClient.TileEntityModels[positionEvent.NewPosition];
-            var unit = instance.ModelClient.UnitEntityModels[positionEvent.UnitId];
+            var oldTile = instance.ModelClient.TileEntityModels[gameEvent.OldPosition];
+            var nextTile = instance.ModelClient.TileEntityModels[gameEvent.NewPosition];
+            var unit = instance.ModelClient.UnitEntityModels[gameEvent.UnitId];
             oldTile.OccupierId = -1;
             nextTile.OccupierId = unit.Id;
-            unit.Position = positionEvent.NewPosition;
+            unit.Position = gameEvent.NewPosition;
         }
     }
 }

@@ -24,15 +24,12 @@ namespace Logic.ActionRequests
         public static ActionRequest ReadActionRequest(this Reader reader)
         {
             var typeInt = reader.ReadInt32();
-            switch ((EActionRequestType)typeInt)
+            return (EActionRequestType)typeInt switch
             {
-                case EActionRequestType.EndTurn:
-                    return reader.Read<ActionRequestEndTurn>();
-                case EActionRequestType.Move:
-                    return reader.Read<ActionRequestMove>();
-                default:
-                    return default;
-            }
+                EActionRequestType.EndTurn => reader.Read<ActionRequestEndTurn>(),
+                EActionRequestType.Move => reader.Read<ActionRequestMove>(),
+                _ => default
+            };
         }
     }
 }

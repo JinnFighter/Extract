@@ -4,13 +4,13 @@ using UnityEngine;
 
 namespace Client.ActionEvents
 {
-    public class ActionEventGameEndedHandler : IActionEventHandler
+    public class ActionEventGameEndedHandler : BaseActionEventHandler<ActionEventGameEnded>
     {
-        public void HandleActionEvent(BattleInstanceClient instance, ActionEvent gameEvent)
-        {
-            if (gameEvent.EventType != EActionEventType.GameEnd) return;
+        public override EActionEventType RequestedType => EActionEventType.GameEnd;
 
-            var id = (gameEvent as ActionEventGameEnded).WinnerId;
+        protected override void HandleActionEventInner(BattleInstanceClient instance, ActionEventGameEnded gameEvent)
+        {
+            var id = gameEvent.WinnerId;
             Debug.Log($"Game over event, winner is {id}");
             instance.ModelClient.SetWinner(id);
             instance.StateMachine.ChangeState(EBattleStateId.GameOver);

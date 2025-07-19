@@ -11,16 +11,22 @@ namespace Client.ActionEvents
     {
         private readonly Stack<ActionEvent> _sequenceStack = new();
         private readonly List<ActionEvent> _lastLoggedEvents = new();
-        private readonly Dictionary<EActionEventType, IActionEventHandler> _eventHandlers = new()
-        {
-            { EActionEventType.GameStart, new ActionEventGameStartedHandler() },
-            { EActionEventType.FullEntity, new ActionEventFullEntityHandler() },
-        };
+        private readonly List<ActionEvent> _eventsBuffer = new();
 
         private BattleInstanceClient _battleInstance;
         private NetworkService _networkService;
         public bool IsListening { get; private set; }
         public event Action<List<ActionEvent>> OnEventsLogged;
+
+        public readonly Dictionary<EActionEventType, IActionEventHandler> EventHandlers = new()
+        {
+            { EActionEventType.InitStart, new ActionEventInitStartedHandler() },
+            { EActionEventType.GameStart , new ActionEventGameStartHandler() },
+            { EActionEventType.FullEntity, new ActionEventFullEntityHandler() },
+            { EActionEventType.PlayerTurn, new ActionEventActivePlayerChangedHandler() },
+            { EActionEventType.PositionChanged, new ActionEventPositionChangedHandler() },
+            { EActionEventType.GameEnd, new ActionEventGameEndedHandler() }
+        };
 
         public void Init(BattleInstanceClient battleInstance, NetworkService networkService)
         {
@@ -38,7 +44,7 @@ namespace Client.ActionEvents
         {
             if (actionEvent.IsInitEvent)
             {
-                if (_eventHandlers.TryGetValue(actionEvent.EventType, out var handler))
+                if (EventHandlers.TryGetValue(actionEvent.EventType, out var handler))
                 {
                     handler.HandleActionEvent(_battleInstance, actionEvent);
                 }
@@ -60,7 +66,9 @@ namespace Client.ActionEvents
             {
                 return;
             }
-            OnEventsLogged?.Invoke(new List<ActionEvent>(_lastLoggedEvents));
+            _eventsBuffer.Clear();
+            _eventsBuffer.AddRange(_lastLoggedEvents);
+            OnEventsLogged?.Invoke(_eventsBuffer);
             _lastLoggedEvents.Clear();
         }
 
