@@ -24,7 +24,7 @@ namespace Ui.DebugWindows
         private void Awake()
         {
             _battleInstance = AutoResolver.Resolve<BattleInstanceClient>();
-            _actionRequestSender = _battleInstance;
+            _actionRequestSender = AutoResolver.Resolve<IActionRequestSender>();
             _buttonExecute.onClick.AddListener(HandleButtonExecuteClicked);
         }
 
@@ -44,7 +44,7 @@ namespace Ui.DebugWindows
 
         private void HandleButtonExecuteClicked()
         {
-            var path = new List<Vector2Int> { new Vector2Int(Convert.ToInt32(_inputX.text), Convert.ToInt32(_inputY.text) ) };
+            var path = new List<Vector2Int> { new (Convert.ToInt32(_inputX.text), Convert.ToInt32(_inputY.text) ) };
             _actionRequestSender.SendActionRequest(new ActionRequestMove
             {
                 CasterId = Convert.ToInt32(_input.text),

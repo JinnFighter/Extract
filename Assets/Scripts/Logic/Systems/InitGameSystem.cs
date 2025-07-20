@@ -116,7 +116,7 @@ namespace Logic.Systems
                     Properties = propertyDict,
                     TilePosition = new Vector2Int((int)unitSetupInfo.SpawnPosition.x,
                         (int)unitSetupInfo.SpawnPosition.y),
-                    WorldPosition = unitSetupInfo.SpawnPosition,
+                    WorldPosition = logicModelServer.TileEntities[unitEntity.Position].WorldPosition,
                     IsInitEvent = true
                 };
                         

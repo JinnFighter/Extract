@@ -22,6 +22,7 @@ namespace Init
         [Inject] private IUiService _uiService;
         [Inject] private IUnitEntitySelectorSystem _unitEntitySelectorSystem;
         [Inject] private IActionRequestBuilderSystem _actionRequestBuilderSystem;
+        [Inject] private IActionRequestSender _actionRequestSender;
         [SerializeField] private ReplayService _replayService;
         private BattleScreenModel _battleScreenModel;
 
@@ -34,7 +35,7 @@ namespace Init
             _battleScreenModel = new BattleScreenModel(new BattleScreenStateModelAlly
                 {
                     LogicModelClient = _battleInstanceClient.ModelClient,
-                    ActionRequestSender = _battleInstanceClient,
+                    ActionRequestSender = _actionRequestSender,
                     UserDataService = _userDataService,
                     ActionRequestBuilderSystem = _actionRequestBuilderSystem,
                 },

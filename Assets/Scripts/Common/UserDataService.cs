@@ -23,6 +23,13 @@ namespace Common
             }
 
             _playerDataLocal.SetNickname(nickname);
+            for (var i = 0; i < 3; i++)
+            {
+                if (PlayerPrefs.HasKey($"coterie_{i}"))
+                {
+                    _playerDataLocal.AddCoterie(PlayerPrefs.GetString($"coterie_{i}"));
+                }
+            }
         }
 
         public void Terminate()

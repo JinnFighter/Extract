@@ -9,7 +9,7 @@ using VContainer;
 
 namespace Client
 {
-    public class BattleInstanceClient : MonoBehaviour, IActionRequestSender
+    public class BattleInstanceClient : MonoBehaviour
     {
         [SerializeField] private GameFieldSetup _gameFieldSetup;
         public readonly ActionEventListener ActionEventListener = new();
@@ -18,14 +18,6 @@ namespace Client
         [Inject] private UserDataService _userDataService;
         public LogicModelClient ModelClient { get; } = new();
         public BattleStateMachine StateMachine { get; private set; }
-
-        public void SendActionRequest<T>(T actionRequest) where T : ActionRequest
-        {
-            _networkService.SendClientBroadcast(new ActionRequestBroadcast
-            {
-                ActionRequest = actionRequest
-            });
-        }
 
         public void Init()
         {
