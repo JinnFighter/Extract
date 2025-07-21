@@ -11,21 +11,16 @@ namespace Ui.MainMenu
     {
         protected override void InitInner()
         {
-            View.ButtonHost.onClick.AddListener(HandleButtonHostClicked);
-            View.ButtonJoin.onClick.AddListener(HandleButtonJoinClicked);
-            View.ButtonCoterie.onClick.AddListener(HandleButtonCoterieClicked);
+            SubscriptionAggregator.ListenEvent(View.ButtonHost.onClick, HandleButtonHostClicked);
+            SubscriptionAggregator.ListenEvent(View.ButtonJoin.onClick, HandleButtonJoinClicked);
+            SubscriptionAggregator.ListenEvent(View.ButtonCoterie.onClick, HandleButtonCoterieClicked);
             View.TextFieldNickname.text = Model.UserDataService.LocalPlayer.Nickname;
-            View.TextFieldNickname.onEndEdit.AddListener(HandleTextFieldNicknameEndEdit);
+            SubscriptionAggregator.ListenEvent(View.TextFieldNickname.onEndEdit, HandleTextFieldNicknameEndEdit);
             Model.LobbyService.Players.OnChange += HandlePlayersChanged;
         }
 
-        
-
         protected override void TerminateInner()
         {
-            View.ButtonHost.onClick.RemoveListener(HandleButtonHostClicked);
-            View.ButtonJoin.onClick.RemoveListener(HandleButtonJoinClicked);
-            View.TextFieldNickname.onEndEdit.RemoveListener(HandleTextFieldNicknameEndEdit);
             Model.LobbyService.Players.OnChange -= HandlePlayersChanged;
         }
 
@@ -59,7 +54,7 @@ namespace Ui.MainMenu
             View.ButtonJoin.gameObject.SetActive(false);
             View.ButtonCoterie.gameObject.SetActive(false);
             View.TextConnectionInfo.gameObject.SetActive(true);
-            await Model.NetworkService.Connect();
+            await Model.NetworkService.Connect(View.TextFieldIp.text);
         }
         
         private void HandleButtonCoterieClicked()
