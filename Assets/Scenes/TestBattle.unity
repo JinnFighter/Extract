@@ -3408,7 +3408,7 @@ MonoBehaviour:
   <Team2SpawnPoints>k__BackingField:
   - {x: 19.5, y: 0, z: 9.5}
   - {x: 23.5, y: 0, z: 7.5}
-  - {x: 19.5, y: 0, z: 6.5}
+  - {x: 18.5, y: 0, z: 6.5}
   _dataTilemap: {fileID: 1653504818}
   _objectsTilemap: {fileID: 625273291}
   _areaTilemap: {fileID: 1112527110}

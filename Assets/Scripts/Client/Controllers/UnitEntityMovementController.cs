@@ -7,7 +7,6 @@ namespace Client.Controllers
         protected override void InitInner()
         {
             Model.OnPositionUpdated += HandlePositionUpdated;
-            HandlePositionUpdated(Model.Position);
         }
 
         protected override void TerminateInner()
@@ -17,7 +16,7 @@ namespace Client.Controllers
         
         private void HandlePositionUpdated(Vector2Int obj)
         {
-            View.transform.position = new Vector3(obj.x, obj.y, 0);
+            View.transform.position = Model.WorldPosition;
         }
     }
 }

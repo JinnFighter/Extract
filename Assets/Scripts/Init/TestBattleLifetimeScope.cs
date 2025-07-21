@@ -24,6 +24,8 @@ namespace Init
             builder.Register<ActionRequestBuilderSystem>(Lifetime.Singleton).As<IActionRequestBuilderSystem>();
             builder.Register<ClientTileMovePriceGetter>(Lifetime.Singleton).As<ITileMovePriceGetter>();
             builder.Register<PathfinderService>(Lifetime.Singleton).As<IPathfinderService>();
+            builder.Register<ActionEventSender>(Lifetime.Singleton).As<IActionEventSender>();
+            builder.Register<ActionRequestSender>(Lifetime.Singleton).As<IActionRequestSender>();
             builder.RegisterInstance(_battleInstance).As<BattleInstance>();
             builder.RegisterInstance(_battleInstanceClient).As<BattleInstanceClient>();
             builder.RegisterInstance(_replayService).As<ReplayService>();

@@ -2,10 +2,8 @@ using System.Collections.Generic;
 using System.Linq;
 using Common;
 using Cysharp.Threading.Tasks;
-using FishNet.Broadcast;
 using FishNet.Connection;
 using FishNet.Object;
-using Logic.ActionEvents;
 using Logic.ActionRequests;
 using UnityEngine;
 using VContainer;
@@ -13,34 +11,15 @@ using Channel = FishNet.Transporting.Channel;
 
 namespace Logic
 {
-    public class BattleInstance : NetworkBehaviour, IActionEventSender
+    public class BattleInstance : NetworkBehaviour
     {
         [SerializeField] private GameFieldSetup _gameFieldSetup;
         private readonly LogicRunner _logicRunner = new();
         [Inject] private LobbyService _lobbyService;
         [Inject] private NetworkService _networkService;
         [Inject] private UserDataService _userDataService;
-
-        public void SendActionEvent(ActionEvent actionEvent)
-        {
-            if (!IsServerInitialized) return;
-
-            _networkService.SendServerBroadcast(new BroadcastActionEvent
-            {
-                ActionEvent = actionEvent
-            });
-        }
-
-        public void SendOption(ActionRequestOption option)
-        {
-            if (!IsServerInitialized) return;
-
-            _networkService.SendServerBroadcast(new BroadcastOption
-            {
-                Option = option
-            });
-        }
-
+        [Inject] private IActionEventSender _actionEventSender;
+        
         public async void Init()
         {
             _userDataService.LocalPlayer.SetReady(true);
@@ -77,17 +56,23 @@ namespace Logic
                 {
                     Id = player.Id
                 });
-                unitsSetupInfo.Add(new UnitSetupInfo
+
+                for (var i = 0; i < player.Coterie.Count; i++)
                 {
-                    Id = id,
-                    NameId = "test",
-                    OwnerId = player.OwnerId,
-                    TeamId = teamId,
-                    SpawnPosition = teamId == 0
-                        ? _gameFieldSetup.Team1SpawnPoints[0]
-                        : _gameFieldSetup.Team2SpawnPoints[0]
-                });
-                id++;
+                    var unitId = player.Coterie[i];
+                    unitsSetupInfo.Add(new UnitSetupInfo
+                    {
+                        Id = id,
+                        NameId = unitId,
+                        OwnerId = player.OwnerId,
+                        TeamId = teamId,
+                        SpawnPosition = teamId == 0
+                            ? _gameFieldSetup.Team1SpawnPoints[i]
+                            : _gameFieldSetup.Team2SpawnPoints[i]
+                    });
+                    id++;
+                }
+                
                 teamId++;
             }
 
@@ -108,39 +93,7 @@ namespace Logic
                 TilesSetupInfo = tilesSetupInfo
             };
 
-            _logicRunner.StartGameLogic(setupInfo, this);
+            _logicRunner.StartGameLogic(setupInfo, _actionEventSender);
         }
-    }
-
-    public struct BroadcastActionEvent : IBroadcast
-    {
-        public ActionEvent ActionEvent { get; set; }
-    }
-
-    public struct GameSetupInfo
-    {
-        public List<PlayerSetupInfo> PlayersSetupInfo;
-        public List<TileSetupInfo> TilesSetupInfo;
-        public List<UnitSetupInfo> UnitsSetupInfo;
-    }
-
-    public struct PlayerSetupInfo
-    {
-        public int Id;
-    }
-
-    public struct TileSetupInfo
-    {
-        public Vector2Int TilePosition;
-        public Vector3 WorldPosition;
-    }
-
-    public struct UnitSetupInfo
-    {
-        public int Id;
-        public string NameId;
-        public int OwnerId;
-        public int TeamId;
-        public Vector3 SpawnPosition;
     }
 }

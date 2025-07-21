@@ -13,10 +13,13 @@ namespace Ui.MainMenu
         {
             View.ButtonHost.onClick.AddListener(HandleButtonHostClicked);
             View.ButtonJoin.onClick.AddListener(HandleButtonJoinClicked);
+            View.ButtonCoterie.onClick.AddListener(HandleButtonCoterieClicked);
             View.TextFieldNickname.text = Model.UserDataService.LocalPlayer.Nickname;
             View.TextFieldNickname.onEndEdit.AddListener(HandleTextFieldNicknameEndEdit);
             Model.LobbyService.Players.OnChange += HandlePlayersChanged;
         }
+
+        
 
         protected override void TerminateInner()
         {
@@ -44,6 +47,7 @@ namespace Ui.MainMenu
         {
             View.ButtonHost.gameObject.SetActive(false);
             View.ButtonJoin.gameObject.SetActive(false);
+            View.ButtonCoterie.gameObject.SetActive(false);
             View.TextConnectionInfo.gameObject.SetActive(true);
             await Model.NetworkService.Host();
             await Model.NetworkService.Connect();
@@ -53,8 +57,14 @@ namespace Ui.MainMenu
         {
             View.ButtonHost.gameObject.SetActive(false);
             View.ButtonJoin.gameObject.SetActive(false);
+            View.ButtonCoterie.gameObject.SetActive(false);
             View.TextConnectionInfo.gameObject.SetActive(true);
             await Model.NetworkService.Connect();
+        }
+        
+        private void HandleButtonCoterieClicked()
+        {
+            StateRouter.PushState<CoterieMainMenuScreenState>();
         }
     }
 }

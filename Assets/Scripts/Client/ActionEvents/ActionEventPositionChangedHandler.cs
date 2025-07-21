@@ -13,6 +13,7 @@ namespace Client.ActionEvents
             var unit = instance.ModelClient.UnitEntityModels[gameEvent.UnitId];
             oldTile.OccupierId = -1;
             nextTile.OccupierId = unit.Id;
+            unit.WorldPosition = instance.ModelClient.TileEntityModels[gameEvent.NewPosition].WorldPosition;
             unit.Position = gameEvent.NewPosition;
         }
     }

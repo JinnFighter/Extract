@@ -7,6 +7,7 @@ namespace Ui.MainMenu
         protected override void RegisterStates()
         {
             RegisterState<MenuMainMenuScreenState>(Model.MainMenuStateModel, View.MainMenuStateView, true);
+            RegisterState<CoterieMainMenuScreenState>(Model.CoterieStateModel, View.CoterieMainMenuStateView);
         }
     }
 }
