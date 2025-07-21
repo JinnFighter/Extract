@@ -31,6 +31,9 @@ namespace Logic.ActionEvents
                 case ActionEventPlayerChanged playerChanged:
                     writer.Write(playerChanged);
                     break;
+                case ActionEventPropertyUpdate propertyUpdate:
+                    writer.Write(propertyUpdate);
+                    break;
                 case ActionEventGameEnded gameEnded:
                     writer.Write(gameEnded);
                     break;
@@ -48,6 +51,7 @@ namespace Logic.ActionEvents
                 EActionEventType.SequenceEnd => reader.Read<ActionEventSequenceEnd>(),
                 EActionEventType.PositionChanged => reader.Read<ActionEventPositionChanged>(),
                 EActionEventType.PlayerTurn => reader.Read<ActionEventPlayerChanged>(),
+                EActionEventType.PropertyUpdate => reader.Read<ActionEventPropertyUpdate>(),
                 EActionEventType.GameEnd => reader.Read<ActionEventGameEnded>(),
                 _ => null
             };
