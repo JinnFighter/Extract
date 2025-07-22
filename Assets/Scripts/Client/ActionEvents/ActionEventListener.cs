@@ -25,6 +25,7 @@ namespace Client.ActionEvents
             { EActionEventType.FullEntity, new ActionEventFullEntityHandler() },
             { EActionEventType.PlayerTurn, new ActionEventActivePlayerChangedHandler() },
             { EActionEventType.PositionChanged, new ActionEventPositionChangedHandler() },
+            { EActionEventType.PropertyUpdate, new ActionEventPropertyUpdateHandler() },
             { EActionEventType.GameEnd, new ActionEventGameEndedHandler() }
         };
 

@@ -5,7 +5,7 @@ using Logic.ActionRequests;
 
 namespace Client
 {
-    public interface IPlayerEntityClient
+    public interface IPlayerEntityClient : IEntityClient
     {
         int Id { get; set; }
         int NetId { get; set; }
@@ -14,6 +14,5 @@ namespace Client
         event Action<ActionRequestOption> OnOptionRemoved;
         void AddOption(ActionRequestOption option);
         void RemoveOption(ActionRequestOption option);
-        void Set(EPropertyType type, int value);
     }
 }
