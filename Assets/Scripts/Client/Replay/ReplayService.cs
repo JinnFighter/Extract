@@ -78,10 +78,36 @@ namespace Client.Replay
             while (_unplayedSequences.Count > 0)
             {
                 var currentSequence = _unplayedSequences.Dequeue();
-                foreach (var actionReplay in currentSequence) yield return actionReplay.Play(battleInstance);
+                foreach (var actionReplay in currentSequence) yield return Play(actionReplay, battleInstance);
             }
             
             _isPlaying = false;
+        }
+        
+        private IEnumerator Play(ActionReplay replay, BattleInstanceClient battleInstance)
+        {
+            Debug.Log($"PLAYING {replay.ActionEvent.EventType}");
+            var isFrameReached = false;
+            if (replay.Viewer != null)
+            {
+                var viewerSequence = replay.Viewer.Play(battleInstance, replay.ActionEvent);
+                while (viewerSequence.MoveNext())
+                {
+                    var isKeyFrameHit = viewerSequence.Current;
+                    if (isKeyFrameHit)
+                    {
+                        replay.EventHandler.HandleActionEvent(battleInstance, replay.ActionEvent);
+                        isFrameReached = true;
+                    }
+
+                    yield return null;
+                }
+            }
+
+            if (!isFrameReached)
+            {
+                replay.EventHandler.HandleActionEvent(battleInstance, replay.ActionEvent);
+            }
         }
     }
 }
