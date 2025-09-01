@@ -88,7 +88,7 @@ namespace Common
                 }
             }
 
-            _networkManager.ClientManager.StartConnection(address);
+            _networkManager.ClientManager.StartConnection(address == "" ? "localhost" : address);
 
             await UniTask.WaitUntil(() => finishedConnectionAttempt);
             _networkManager.ClientManager.OnClientConnectionState -= HandleConnectionChanged;
