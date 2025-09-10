@@ -10,6 +10,8 @@ namespace Client
         public int Id { get; set; }
         public int OwnerId { get; set; }
         public event Action<Vector2Int> OnPositionUpdated;
+        public event Action<Vector3> OnWorldPositionUpdated;
+
         public Vector2Int Position
         {
             get => _position;
@@ -25,7 +27,20 @@ namespace Client
             }
         }
 
-        public Vector3 WorldPosition { get; set; }
+        public Vector3 WorldPosition
+        {
+            get => _worldPosition;
+            set
+            {
+                if (_worldPosition == value)
+                {
+                    return;
+                }
+                
+                _worldPosition = value;
+                OnWorldPositionUpdated?.Invoke(_worldPosition);
+            }
+        }
         public int TeamId { get; set; }
         public string NameId { get; set; }
         public event Action<ActionRequestOption> OnOptionAdded;
@@ -33,6 +48,7 @@ namespace Client
         public Dictionary<EActionRequestType, ActionRequestOption> ActionRequestOptions { get; } = new();
 
         private Vector2Int _position;
+        private Vector3 _worldPosition;
         
         public void AddOption(ActionRequestOption option)
         {

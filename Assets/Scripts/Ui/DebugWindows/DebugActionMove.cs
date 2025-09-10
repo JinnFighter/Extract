@@ -44,10 +44,13 @@ namespace Ui.DebugWindows
 
         private void HandleButtonExecuteClicked()
         {
-            var path = new List<Vector2Int> { new (Convert.ToInt32(_inputX.text), Convert.ToInt32(_inputY.text) ) };
+            var caster = Convert.ToInt32(_input.text);
+            var start = _battleInstance.ModelClient.UnitEntityModels[caster].Position;
+            var target = new Vector2Int(Convert.ToInt32(_inputX.text), Convert.ToInt32(_inputY.text));
+            var path = new List<Vector2Int> { new (start.x, start.y + 1), new (start.x, start.y + 2), target};
             _actionRequestSender.SendActionRequest(new ActionRequestMove
             {
-                CasterId = Convert.ToInt32(_input.text),
+                CasterId = caster,
                 Path = path
             });
         }

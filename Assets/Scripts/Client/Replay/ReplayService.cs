@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Client.Replay.Viewers;
 using Logic.ActionEvents;
 using UnityEngine;
 using VContainer;
@@ -8,7 +9,10 @@ namespace Client.Replay
 {
     public class ReplayService : MonoBehaviour
     {
-        private readonly Dictionary<EActionEventType, IActionViewer> _eventViewers = new();
+        private readonly Dictionary<EActionSequenceType, IActionViewer> _eventViewers = new()
+        {
+            { EActionSequenceType.Move, new ActionViewerMovement() },
+        };
 
         private readonly Queue<List<ActionReplay>> _unplayedSequences = new();
         [Inject] private BattleInstanceClient _battleInstance;
@@ -27,15 +31,11 @@ namespace Client.Replay
 
         private void Replay(List<ActionEvent> gameStateEvents)
         {
-            var currentSequence = new List<ActionReplay>();
-            foreach (var gameStateEvent in gameStateEvents)
+            var currentSequence = ParseSequence(gameStateEvents);
+
+            if (currentSequence.Count == 0)
             {
-                var actionReplay = ParseEvent(gameStateEvent);
-                if (actionReplay == null)
-                {
-                    continue;
-                }
-                currentSequence.Add(actionReplay);
+                return;
             }
             
             _unplayedSequences.Enqueue(currentSequence);
@@ -48,14 +48,14 @@ namespace Client.Replay
             Replay(obj);
         }
 
-        private ActionReplay ParseEvent(ActionEvent actionEvent)
+        private ActionReplay ParseEvent(ActionEvent actionEvent, IActionViewer viewer)
         {
             var isPresent = _battleInstance.ActionEventListener.EventHandlers.TryGetValue(actionEvent.EventType, out var handler);
             if (!isPresent)
             {
                 return null;
             }
-            _eventViewers.TryGetValue(actionEvent.EventType, out var viewer);
+            
             var replay = new ActionReplay
             {
                 ActionEvent = actionEvent,
@@ -63,6 +63,48 @@ namespace Client.Replay
                 Viewer = viewer
             };
             return replay;
+        }
+
+        private List<ActionReplay> ParseSequence(List<ActionEvent> gameStateEvents)
+        {
+            var currentSequence = new List<ActionReplay>();
+            var sequenceInfo = new Stack<IActionViewer>();
+            sequenceInfo.Push(null);
+            Debug.Log($"Received {gameStateEvents.Count} events to replay");
+            foreach (var gameStateEvent in gameStateEvents)
+            {
+                switch (gameStateEvent.EventType)
+                {
+                    case EActionEventType.SequenceStart:
+                    {
+                        var sequenceStartType = ((ActionEventSequenceStart)gameStateEvent).SequenceType;
+                        Debug.Log($"Starting sequence of type {sequenceStartType}");
+                        _eventViewers.TryGetValue(sequenceStartType, out var viewer);
+                        sequenceInfo.Push(viewer);
+                        break;
+                    }
+                    case EActionEventType.SequenceEnd:
+                        var sequenceEndType = ((ActionEventSequenceEnd)gameStateEvent).SequenceType;
+                        Debug.Log($"Ending sequence of type {sequenceEndType}");
+                        sequenceInfo.Pop();
+                        break;
+                    default:
+                    {
+                        Debug.Log($"Parsing event of type {gameStateEvent.EventType}");
+                        var currentViewer = sequenceInfo.Peek();
+                        var actionReplay = ParseEvent(gameStateEvent, currentViewer);
+                        if (actionReplay == null)
+                        {
+                            continue;
+                        }
+
+                        currentSequence.Add(actionReplay);
+                        break;
+                    }
+                }
+            }
+
+            return currentSequence;
         }
 
         private void StartReplay(BattleInstanceClient battleInstance)
