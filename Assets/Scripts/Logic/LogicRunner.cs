@@ -17,7 +17,8 @@ namespace Logic
         private readonly Dictionary<EActionRequestType, ILogicSystem> _requestSystems = new()
         {
             { EActionRequestType.EndTurn, new EndTurnSystem() },
-            { EActionRequestType.Move, new MoveActionRequestSystem() }
+            { EActionRequestType.Move, new MoveActionRequestSystem() },
+            { EActionRequestType.Attack, new AttackActionRequestSystem() }
         };
         private readonly List<IInitializeSystem> _initializeSystems = new()
         {

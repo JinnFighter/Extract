@@ -2,7 +2,7 @@
 
 namespace Client
 {
-    public interface ITileEntityClient
+    public interface ITileEntityClient : IEntityClient
     {
         Vector2Int Position { get; set; }
         Vector3 WorldPosition { get; set; }

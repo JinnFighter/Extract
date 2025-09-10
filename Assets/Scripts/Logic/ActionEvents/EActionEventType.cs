@@ -10,6 +10,7 @@
         PositionChanged,
         SequenceStart,
         SequenceEnd,
+        PropertyUpdate,
         GameEnd,
     }
 }

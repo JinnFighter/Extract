@@ -5,11 +5,12 @@ using UnityEngine;
 
 namespace Client
 {
-    public interface IUnitEntityModelClient
+    public interface IUnitEntityModelClient : IEntityClient
     {
         public int Id { get; set; }
         public int OwnerId { get; set; }
         public event Action<Vector2Int> OnPositionUpdated;
+        public event Action<Vector3> OnWorldPositionUpdated;
         public Vector2Int Position { get; set; }
         public Vector3 WorldPosition { get; set; }
         public int TeamId { get; set; }

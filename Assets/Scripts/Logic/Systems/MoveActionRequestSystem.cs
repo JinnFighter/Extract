@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using Logic.ActionEvents;
 using Logic.ActionRequests;
+using UnityEngine;
 
 namespace Logic.Systems
 {
@@ -10,6 +11,7 @@ namespace Logic.Systems
         
         protected override IEnumerator<ActionEvent> RunPrepareLogicInner(ActionRequest rootRequest, LogicModelServer modelServer)
         {
+            Debug.Log($"START MOVE ACTION REQUEST");
             _pathIndex = 0;
             yield return new ActionEventSequenceStart
             {
@@ -20,6 +22,7 @@ namespace Logic.Systems
         protected override IEnumerator<ActionEvent> RunLogicInner(ActionRequest rootRequest, LogicModelServer modelServer)
         {
             var moveRequest = rootRequest as ActionRequestMove;
+            Debug.Log($"Received move request with path {moveRequest.Path.Count}");
             var unitModel = modelServer.UnitEntities[rootRequest.CasterId];
             while (_pathIndex < moveRequest.Path.Count)
             {
